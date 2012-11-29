@@ -1,4 +1,3 @@
 stockStatusFAO
 ==============
 
-Work for simulaytion
