@@ -53,6 +53,9 @@ for (year in 2:years) {
 	bio <- ssb(stk)[,year-1]
 	eff <- har * (bio / bmsy) ^ xp
 	fctl <- fwdControl(data.frame(year=year, quantity='f', val=c(eff)[1]))
+	fctl@trgtArray <- array(NA, dim=c(1,3,iters), dimnames=list(year, c('min','val','max'), iter=1:iters))
+	fctl@trgtArray[,2,] <- c(eff)
+	srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=year)), 0.2)
 	stk <- fwd(stk, fctl, sr=list(model='bevholt', params=params(brp)), sr.residuals=srres)
 }
 
