@@ -10,6 +10,7 @@
 # XX {{{
 # }}}
 
+xyplot(data~age, catch.sel(brp), type='b')
 
 xyplot(data~age, harvest(brp)[,5], type='b', pch=19)
 
