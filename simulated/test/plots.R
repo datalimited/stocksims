@@ -17,3 +17,10 @@ xyplot(data~age, harvest(stk)[,30])
 xyplot(data~age|as.factor(year), harvest(stk), scales=list(relation='free'))
 
 xyplot(data~year, iterMeans(ssb(stk) / ssb(stk1)))
+
+# One page report per dataset
+
+# stock
+
+# df
+# ssb, tb, catch, refpts, ssb/ssbMSY

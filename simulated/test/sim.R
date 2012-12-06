@@ -21,9 +21,25 @@ xp <- 0.200
 # foo(lhpar, iniF, selectivity, target, error.level
 
 # (1) LH & selectivity
-# par
+
+# Linf=60cm, ages=1:20, fbar=4:20, steep=0.6
 par <- gislasim(FLPar(linf=60, sl=4, sr=120, a1=4, s=0.6))
 brp <- lh(par, range=c(min=1, max=20, minfbar=4, maxfbar=20, plusgroup=20))
+
+# Small Pelagic: Linf=30cm, ages=1:8, fbar=2:8, steep=0.7
+
+# SP_ID50_ED0.2_SEL
+
+# SP, DE, LP
+# ID100, ID 60, ID40
+# ED0.1, ED0.3, ED0.6, FD
+# SELFD, SELF, SELD, SELDF
+# TS20, TS40, TS60
+# UR10, UR25, UR50
+
+# Demersal: Linf=100cm, ages=1:20, fbar=4:20, steep=0.6
+
+# Large Pelagic: Linf=250cm, ages=1:30, fbar=6:30, steep=0.85
 
 # par <- gislasim(FLPar(linf=60, sl=4, sr=30, a1=2, s=0.6))
 # brp <- lh(par, range=c(min=1, max=20, minfbar=2, maxfbar=20, plusgroup=20))
