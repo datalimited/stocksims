@@ -8,14 +8,14 @@
 # Modified:
 
 library(FLAdvice)
-# library(FLBioDym)
 
 ## Vars
-
 years <- 60
 iters <- 100
 xp <- 0.109
+xp <- 0.300
 
+set.seed(1973)
 
 ## TEST 1
 
@@ -39,8 +39,6 @@ stk <- stf(stk, years-1, 1)
 stock(stk) <- computeStock(stk)
 
 # Recruitment variability
-srres <- rlnorm(100, stock(stk)[,2], 0.1)
-
 stk <- propagate(stk, iters)
 
 # (3) Contrast (values of xp?)
