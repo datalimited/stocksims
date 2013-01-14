@@ -34,7 +34,6 @@ setupStock <- function(brp, iniBiomass) {
 	return(stk)
 } # }}}
 
-
 # effortDynamics {{{
 effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear) {
 
