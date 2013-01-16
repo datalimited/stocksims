@@ -68,7 +68,9 @@ for(lh in names(sce$LH)) {
 						catch(stock) <- catch(stock) * (100 - sce$UR[[ur]] / 100)
 					# SAVE
 					name <- paste(lh, id, ed, ts, ur, sep="_")
-					out[[name]] <- list(lh=par, code=name, stock=stock)
+					name(stock) <- name
+					desc(stock) <- paste(name, Sys.time())
+					out[[name]] <- list(lh=par, code=name, stock=stock, refpts=refpts(brp))
 					print(name)
 					}
 				}
@@ -79,4 +81,7 @@ for(lh in names(sce$LH)) {
 # save RData
 save(out, file="out/out.RData")
 
-# JAN 16 2013 18:34
+# Overall plot of SSB
+fqs <- FLQuants(lapply(out, function(x) ssb(x$stock)))
+xyplot(data~year|qname, fqs,
+	lattice.options=list(par.strip.text=list(cex=0.3)), type='l')
