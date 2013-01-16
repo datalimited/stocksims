@@ -8,7 +8,7 @@
 # Modified:
 
 # setupStock {{{
-setupStock <- function(brp, iniBiomass) {
+setupStock <- function(brp, iniBiomass, nyears) {
 	
 	# find corresponding F
 	idx <- which(ssb(brp) <= iniBiomass)[1]
@@ -20,10 +20,10 @@ setupStock <- function(brp, iniBiomass) {
 	dimnames(stk) <- list(year=1)
 
 	# make range fbar match par$a1 and last age
-	range(stk, c('minfbar', 'maxfbar')) <- c(c(par['a1',]), 20)
+	#range(stk, c('minfbar', 'maxfbar')) <- c(c(par['a1',]), dims(stk)$max)
 
 	# expand
-	stk <- stf(stk, years-1, 1)
+	stk <- stf(stk, nyears-1, 1)
 
 	# get total biomass recomputed
 	stock(stk) <- computeStock(stk)
@@ -35,7 +35,7 @@ setupStock <- function(brp, iniBiomass) {
 } # }}}
 
 # effortDynamics {{{
-effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear) {
+effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear, xp) {
 
 	for (year in years) {
 		har <- fbar(stk)[,year-1]
@@ -56,6 +56,8 @@ effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear) {
 
 		# fwd
 		stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres)
+    cat ("\r", round(100*year/nyears, digits=0), "% ", sep="")
 	}
+	cat("\n")
 	return(stk)
 } # }}}
