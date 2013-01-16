@@ -4,8 +4,6 @@
 # Copyright 2003-2012 FLR Team. Distributed under the GPL 2 or later
 # Maintainer: Iago Mosqueira, JRC
 # $Id: $
-# Created:
-# Modified:
 
 library(FLAdvice)
 
@@ -19,16 +17,6 @@ vBiomass <- 1000
 
 # OUT
 out <- list()
-
-# Life history: SP, DE, LP
-# 	SP Small Pelagic: Linf=30cm, ages=1:8, fbar=2:8, steep=0.7
-# 	DE Demersal: Linf=100cm, ages=1:20, fbar=4:20, steep=0.6
-# 	LP Large Pelagic: Linf=250cm, ages=1:30, fbar=6:30, steep=0.85
-# Initial depletion: ID10, ID40, ID60
-# Effort/F dynamics, x value: ED0.1, ED0.3, ED0.6, FD
-# Selectivity: SELFD, SELF, SELD, SELDF
-# Length of time series: TS20, TS40, TS60
-# Under-reporting catch %: UR0, UR10, UR25, UR50
 
 # Scenarios list {{{
 sce <- list(
@@ -73,21 +61,22 @@ for(lh in names(sce$LH)) {
 			# SEL
 				# TS
 				for(ts in names(sce$TS)) {
-					stk <- stk[,seq(nyears-sce$TS[[ts]]+1, nyears)]
+					stock <- stk[,seq(nyears-sce$TS[[ts]]+1, nyears)]
 					# UR
 					for(ur in names(sce$UR)) {
 						# NOTE: harvest, stock and catch in stk will not match anymore
-						catch(stk) <- catch(stk) * (100 - sce$UR[[ur]] / 100)
+						catch(stock) <- catch(stock) * (100 - sce$UR[[ur]] / 100)
 					# SAVE
 					name <- paste(lh, id, ed, ts, ur, sep="_")
-					out[[name]] <- list(lh=par, code=name, stock=stk)
+					out[[name]] <- list(lh=par, code=name, stock=stock)
+					print(name)
 					}
 				}
 		}
 	}
 } # }}}
 
-
-
 # save RData
-save(out, file="out.RData")
+save(out, file="out/out.RData")
+
+# JAN 16 2013 18:34
