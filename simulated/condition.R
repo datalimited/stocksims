@@ -1,4 +1,4 @@
- condition.R - DESC
+# condition.R - DESC
 # condition.R
 
 # Copyright 2003-2012 FLR Team. Distributed under the GPL 2 or later
@@ -74,7 +74,7 @@ for(lh in names(sce$LH)) {
 					# UR
 					for(ur in names(sce$UR)) {
 						# NOTE: harvest, stock and catch in stk will not match anymore
-						catch(stock) <- catch(stock) * (100 - sce$UR[[ur]] / 100)
+						catch(stock) <- catch(stock) * (1 - sce$UR[[ur]] / 100)
 						# VAL
 						val[1,] <- c(lh, sce$ID[[id]], sce$ED[[ed]], sel, sce$TS[[ts]], sce$UR[[ur]])
 						# NAME
@@ -92,4 +92,4 @@ for(lh in names(sce$LH)) {
 } # }}}
 
 # save RData
-save(out, file="out/out.RData")
+save(out, file=paste("out/out", format(Sys.time(), "%Y%m%d%H%M"), ".RData", sep=""))
