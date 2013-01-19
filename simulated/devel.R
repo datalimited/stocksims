@@ -73,7 +73,7 @@ for (year in 2:nyears) {
 }
 
 harvest(stk)[,31:60] <- harvest(stk)[,31] * FLQuant(c(1,1.05, 1.1, 1.05,
-	seq(1.05, 0.85, length=16)), dim=c(20,1,1,1,1,iters), quant='age')
+	seq(1.05, 0.85, length=16)), dim=c(20, 1, 1, 1, 1, iters), quant='age')
 
 # (4) Selection patterns change
 # FROM dome-shaped TO flat top half way

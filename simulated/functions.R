@@ -4,8 +4,6 @@
 # Copyright 2003-2012 FLR Team. Distributed under the GPL 2 or later
 # Maintainer: Iago Mosqueira, JRC
 # $Id: $
-# Created:
-# Modified:
 
 # setupStock {{{
 setupStock <- function(brp, iniBiomass, nyears) {

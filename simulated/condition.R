@@ -1,4 +1,4 @@
-# condition.R - DESC
+ condition.R - DESC
 # condition.R
 
 # Copyright 2003-2012 FLR Team. Distributed under the GPL 2 or later
@@ -39,12 +39,20 @@ sce <- list(
 # Effort/F dynamics, x value: ED0.1, ED0.3, ED0.6, FD
 	ED=list(ED0.1=0.1, ED0.3=0.3, ED0.6=0.6),
 # TODO Selectivity: SELFD, SELF, SELD, SELDF
-	SEL=list(SELFD=NA, SELD=NA, SELDF=NA),
+	SEL=list(SELFD=NA, SELD=NA, SELDF=NA, SELF=NA),
 # Length of time series (years): TS20, TS40, TS60
 	TS=list(TS20=20, TS40=40, TS60=60),
 # Under-reporting catch %: UR0, UR10, UR25, UR50
 	UR=list(UR0=0, UR10=10, UR25=25, UR50=50)
 ) # }}}
+
+# VAL {{{
+val <- cbind(
+	LH=factor("SP", levels=names(sce$LH)),
+	SEL=factor("SELF", levels=names(sce$SEL)),
+	as.data.frame(lapply(sce[-c(1, 4)],
+		function(x) factor(NA, levels=unlist(x))))
+)[,names(sce)] # }}}
 
 # Input list {{{
 # LH
@@ -59,6 +67,7 @@ for(lh in names(sce$LH)) {
 			stk <- effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),
 				sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]])
 			# SEL
+				sel <- "SELF"
 				# TS
 				for(ts in names(sce$TS)) {
 					stock <- stk[,seq(nyears-sce$TS[[ts]]+1, nyears)]
@@ -66,12 +75,16 @@ for(lh in names(sce$LH)) {
 					for(ur in names(sce$UR)) {
 						# NOTE: harvest, stock and catch in stk will not match anymore
 						catch(stock) <- catch(stock) * (100 - sce$UR[[ur]] / 100)
-					# SAVE
-					name <- paste(lh, id, ed, ts, ur, sep="_")
-					name(stock) <- name
-					desc(stock) <- paste(name, Sys.time())
-					out[[name]] <- list(lh=par, code=name, stock=stock, refpts=refpts(brp))
-					print(name)
+						# VAL
+						val[1,] <- c(lh, sce$ID[[id]], sce$ED[[ed]], sel, sce$TS[[ts]], sce$UR[[ur]])
+						# NAME
+						name <- paste(lh, id, ed, sel, ts, ur, sep="_")
+						name(stock) <- name
+						desc(stock) <- paste(name, Sys.time())
+						# OUT
+						out[[name]] <- list(lh=par, code=name, stock=stock,
+							refpts=refpts(brp), val=val)
+						print(name)
 					}
 				}
 		}
@@ -80,8 +93,3 @@ for(lh in names(sce$LH)) {
 
 # save RData
 save(out, file="out/out.RData")
-
-# Overall plot of SSB
-fqs <- FLQuants(lapply(out, function(x) ssb(x$stock)))
-xyplot(data~year|qname, fqs,
-	lattice.options=list(par.strip.text=list(cex=0.3)), type='l')

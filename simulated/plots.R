@@ -7,8 +7,10 @@
 
 # Overall plot of SSB
 fqs <- FLQuants(lapply(out, function(x) ssb(x$stock)))
-xyplot(data~year|qname, fqs,
-	lattice.options=list(par.strip.text=list(cex=0.3)), type='l')
+
+pdf(file="out/overallPlot.pdf")
+print(xyplot(data~year|qname, fqs, strip=FALSE, type='l', ylab='SSB'))
+dev.off()
 
 # One page report per dataset
 
