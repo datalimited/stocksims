@@ -24,20 +24,20 @@ sce <- list(
 	LH=list(
 # 	SP Small Pelagic: Linf=30cm, ages=1:8, fbar=2:8, steep=0.7
 		SP=list(
-			par=FLPar(linf=30, sl=2, sr=120, a1=2, s=0.7, v=vBiomass),
+			par=FLPar(linf=30, sl=2, sr=120, a1=2, s=0.70, v=vBiomass),
 			range=c(min=1, max=8, minfbar=2, maxfbar=8, plusgroup=8)),
-# 	DE Demersal: Linf=100cm, ages=1:20, fbar=4:20, steep=0.6
+# 	DE Demersal: Linf=70cm, ages=1:20, fbar=2:20, steep=0.8
 		DE=list(
-			par=FLPar(linf=100, sl=2, sr=120, a1=2, s=0.6, v=vBiomass),
+			par=FLPar(linf=70, sl=2, sr=120, a1=2, s=0.80, v=vBiomass),
 			range=c(min=1, max=20, minfbar=4, maxfbar=20, plusgroup=20)),
-# 	LP Large Pelagic: Linf=250cm, ages=1:30, fbar=6:30, steep=0.85
+# 	LP Large Pelagic: Linf=150cm, ages=1:20, fbar=6:30, steep=0.85
 		LP=list(
-			par=FLPar(linf=250, sl=2, sr=120, a1=2, s=0.85, v=vBiomass),
-			range=c(min=1, max=30, minfbar=6, maxfbar=30, plusgroup=30))),
+			par=FLPar(linf=150, sl=2, sr=120, a1=2, s=0.80, v=vBiomass),
+			range=c(min=1, max=20, minfbar=4, maxfbar=30, plusgroup=20))),
 # Initial depletion: ID10, ID40, ID60
 	ID=list(ID10=0.90, ID40=0.60, ID60=0.40),
-# Effort/F dynamics, x value: ED0.1, ED0.3, ED0.6, FD
-	ED=list(ED0.1=0.1, ED0.3=0.3, ED0.6=0.6),
+# Effort/F dynamics, x value: ED0, ED0.1, ED0.3, ED0.6
+	ED=list(ED0=0, ED0.1=0.1, ED0.3=0.3, ED0.6=0.6),
 # TODO Selectivity: SELFD, SELF, SELD, SELDF
 	SEL=list(SELFD=NA, SELD=NA, SELDF=NA, SELF=NA),
 # Length of time series (years): TS20, TS40, TS60
@@ -81,6 +81,16 @@ for(lh in names(sce$LH)) {
 						name <- paste(lh, id, ed, sel, ts, ur, sep="_")
 						name(stock) <- name
 						desc(stock) <- paste(name, Sys.time())
+						# BD
+#						bd <- FLBioDym(catch=catch(stock), index=stock(stock))
+#						bd@bounds[,1:4] <- matrix(unlist(
+#							list(r=c(1, 0.05, 5, 0.5),
+#								 k=c(1, c(max(catch(bd))), vBiomass*10, vBiomass),
+#								 p=c(-1, 1, 10, 1),
+#								 b0=c(1, c(max(catch(bd))), vBiomass*10, vBiomass),
+#								 q=c(1, 0.1, 10, 1),
+#								 sigma=c(1, 0.01, 10, 0.1))), ncol=4, byrow=T)
+#						bd <- admbBD(bd)
 						# OUT
 						out[[name]] <- list(lh=par, code=name, stock=stock,
 							refpts=refpts(brp), val=val)

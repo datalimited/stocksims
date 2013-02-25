@@ -12,6 +12,10 @@
 * Length of time series: TS20, TS40, TS60
 * Under-reporting catch %: UR0, UR10, UR25, UR50
 
+##
+
+
+
 ## out list
 * lh: FLPar, output of call to gislasim()
 * code: simulation code, see table above
