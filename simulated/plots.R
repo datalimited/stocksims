@@ -6,7 +6,8 @@
 # $Id: $
 
 # Overall plot of SSB
-fqs <- FLQuants(lapply(out, function(x) ssb(x$stock)))
+fqs <- FLQuants(lapply(sims, function(x) ssb(x$stock)))
+fqc <- FLQuants(lapply(sims, function(x) catch(x$stock)))
 
 pdf(file="out/overallPlot.pdf")
 print(xyplot(data~year|qname, fqs, strip=FALSE, type='l', ylab='SSB'))

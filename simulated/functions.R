@@ -9,7 +9,7 @@
 setupStock <- function(brp, iniBiomass, nyears) {
 	
 	# find corresponding F
-	idx <- which(ssb(brp) <= iniBiomass)[1]
+	idx <- max(which(ssb(brp) <= iniBiomass)[1], 2)
 
 	# create from FLBRP
 	stk <- as(brp, 'FLStock')[, idx]
