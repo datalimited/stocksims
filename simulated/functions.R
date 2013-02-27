@@ -73,10 +73,30 @@ oneWayTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	# fwdControl
 	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f[-1]))
 
-	# TODO
-	fctl@trgtArray <- array(NA, dim=c(1,3,iters),
-		dimnames=list(year, c('min','val','max'), iter=1:iters))
-	fctl@trgtArray[,2,] <- c(eff)
+	# SR residuals
+	srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
+
+	# fwd
+	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres)
+	
+	return(stk)
+} # }}}
+
+# rollerCoaster {{{
+rollerCoaster <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
+	years=2:dims(stk)$maxyear) {
+
+
+	# limits
+	f0 <- c(fbar(stk)[,1])
+	fmax <- c(fmax)
+	rate <- exp((log(fmax) - log(f0)) / (length(years)))
+
+	# linear trend
+	f <- rate^(0:59)*f0
+	
+	# fwdControl
+	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f[-1]))
 
 	# SR residuals
 	srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
@@ -87,8 +107,8 @@ oneWayTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	return(stk)
 } # }}}
 
-# twoWayTrip {{{
-twoWayTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
+# oneWayQuickTrip {{{
+oneWayQuickTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	rate=1.20, years=2:dims(stk)$maxyear) {
 
 	# limits
@@ -102,11 +122,6 @@ twoWayTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 
 	# fwdControl
 	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f[-1]))
-
-	# TODO
-	fctl@trgtArray <- array(NA, dim=c(1,3,iters),
-		dimnames=list(year, c('min','val','max'), iter=1:iters))
-	fctl@trgtArray[,2,] <- c(eff)
 
 	# SR residuals
 	srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
