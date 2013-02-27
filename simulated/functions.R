@@ -17,9 +17,6 @@ setupStock <- function(brp, iniBiomass, nyears) {
 	# change 'year' dimnames
 	dimnames(stk) <- list(year=1)
 
-	# make range fbar match par$a1 and last age
-	#range(stk, c('minfbar', 'maxfbar')) <- c(c(par['a1',]), dims(stk)$max)
-
 	# expand
 	stk <- stf(stk, nyears-1, 1)
 
@@ -50,12 +47,72 @@ effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear, xp) {
 		fctl@trgtArray[,2,] <- c(eff)
 
 		# SR residuals
-		srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=year)), 0.2)
+		srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=year)), 0)
 
 		# fwd
 		stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres)
     cat ("\r", round(100*year/nyears, digits=0), "% ", sep="")
 	}
 	cat("\n")
+	return(stk)
+} # }}}
+
+# oneWayTrip {{{
+oneWayTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
+	years=2:dims(stk)$maxyear) {
+
+
+	# limits
+	f0 <- c(fbar(stk)[,1])
+	fmax <- c(fmax)
+	rate <- exp((log(fmax) - log(f0)) / (length(years)))
+
+	# linear trend
+	f <- rate^(0:59)*f0
+	
+	# fwdControl
+	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f[-1]))
+
+	# TODO
+	fctl@trgtArray <- array(NA, dim=c(1,3,iters),
+		dimnames=list(year, c('min','val','max'), iter=1:iters))
+	fctl@trgtArray[,2,] <- c(eff)
+
+	# SR residuals
+	srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
+
+	# fwd
+	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres)
+	
+	return(stk)
+} # }}}
+
+# twoWayTrip {{{
+twoWayTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
+	rate=1.20, years=2:dims(stk)$maxyear) {
+
+	# limits
+	f0 <- c(fbar(stk)[,1])
+	fmax <- c(fmax)
+
+	# linear trend
+	f <- rate^(0:59)*f0
+	f[f > fmax] <- fmax
+	
+
+	# fwdControl
+	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f[-1]))
+
+	# TODO
+	fctl@trgtArray <- array(NA, dim=c(1,3,iters),
+		dimnames=list(year, c('min','val','max'), iter=1:iters))
+	fctl@trgtArray[,2,] <- c(eff)
+
+	# SR residuals
+	srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
+
+	# fwd
+	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres)
+	
 	return(stk)
 } # }}}
