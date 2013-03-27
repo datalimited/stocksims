@@ -76,21 +76,12 @@ for(lh in names(sce$LH)) {
 						name <- paste(lh, id, ed, sel, ts, sep="_")
 						name(stock) <- name
 						desc(stock) <- paste(name, Sys.time())
-						# BD
-#						bd <- FLBioDym(catch=catch(stock), index=stock(stock))
-#						bd@bounds[,1:4] <- matrix(unlist(
-#							list(r=c(1, 0.05, 5, 0.5),
-#								 k=c(1, c(max(catch(bd))), vBiomass*10, vBiomass),
-#								 p=c(-1, 1, 10, 1),
-#								 b0=c(1, c(max(catch(bd))), vBiomass*10, vBiomass),
-#								 q=c(1, 0.1, 10, 1),
-#								 sigma=c(1, 0.01, 10, 0.1))), ncol=4, byrow=T)
-#						bd <- admbBD(bd)
 						# SIMS
 						sims[[name]] <- list(lh=par, code=name, stock=stock,
 							refpts=refpts(brp), val=val)
-						input[[name]] <- list(catch=as.data.frame(catch(stock))[, c("year", "data")],
-							linf=par['linf'])
+						input[[name]] <- list(catch=as.data.frame(catch(stock))[,
+							c("year", "data")], linf=c(par['linf']), tmax=dims(stock)$max,
+							tmat=which(c(mat(brp)) > 0.5)[1]-1)
 						print(name)
 				}
 		}
