@@ -19,7 +19,7 @@ vBiomass <- 1000
 sims <- list()
 input <- list()
 
-# Scenarios list {{{
+# sce: Scenarios list {{{
 sce <- list(
 	# LH
 	LH=list(
@@ -38,14 +38,14 @@ sce <- list(
 # Initial depletion: ID0, ID30, ID60
 	ID=list(ID0=1, ID40=0.70, ID60=0.40),
 # Effort/F dynamics, x value: ED0, ED0.1, ED0.3, ED0.6
-	ED=list(ED0=0, ED0.1=0.1, ED0.3=0.3, ED0.6=0.6),
+	ED=list(ED0.1=0.1, ED0.6=0.6, OW=0.80),
 # TODO Selectivity: SELFD, SELF, SELD, SELDF
 	SEL=list(SELFD=NA, SELD=NA, SELDF=NA, SELF=NA),
 # Length of time series (years): TS20, TS40, TS60
 	TS=list(TS20=20, TS60=60)
 ) # }}}
 
-# VAL {{{
+# val: VAL {{{
 val <- cbind(
 	LH=factor("SP", levels=names(sce$LH)),
 	SEL=factor("SELF", levels=names(sce$SEL)),
@@ -63,8 +63,16 @@ for(lh in names(sce$LH)) {
 		stk <- setupStock(brp, iniBiomass=vBiomass * sce$ID[[id]], nyears)
 		# ED
 		for(ed in names(sce$ED)) {
-			stk <- effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),
+			stk <- switch(ed, 
+			# one way trip
+			"OW"=oneWayTrip(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
+				sr=list(model='bevholt', params=params(brp)), years=2:nyears),
+			# effort dynamics
+			"ED0.1"=effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),
+				sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]]),
+			"ED0.6"=effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),
 				sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]])
+			)
 			# SEL
 				sel <- "SELF"
 				# TS
