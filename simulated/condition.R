@@ -36,9 +36,9 @@ sce <- list(
 			par=FLPar(linf=150, sl=2, sr=120, a1=2, s=0.80, v=vBiomass),
 			range=c(min=1, max=20, minfbar=4, maxfbar=20, plusgroup=20))),
 # Initial depletion: ID0, ID30, ID60
-	ID=list(ID0=1, ID40=0.70, ID60=0.40),
+	ID=list(ID0=1, ID30=0.70, ID60=0.40),
 # Effort/F dynamics, x value: ED0, ED0.1, ED0.3, ED0.6
-	ED=list(ED0.1=0.1, ED0.6=0.6, OW=0.80),
+	ED=list(RC=0.80, ED0.1=0.1, ED0.6=0.6, OW=0.80),
 # TODO Selectivity: SELFD, SELF, SELD, SELDF
 	SEL=list(SELFD=NA, SELD=NA, SELDF=NA, SELF=NA),
 # Length of time series (years): TS20, TS40, TS60
@@ -63,10 +63,15 @@ for(lh in names(sce$LH)) {
 		stk <- setupStock(brp, iniBiomass=vBiomass * sce$ID[[id]], nyears)
 		# ED
 		for(ed in names(sce$ED)) {
+			print(ed)
 			stk <- switch(ed, 
 			# one way trip
 			"OW"=oneWayTrip(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
 				sr=list(model='bevholt', params=params(brp)), years=2:nyears),
+			# roller coaster
+			"RC"=rollerCoaster(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
+			fmsy=refpts(brp)['msy', 'harvest'], years=2:nyears, up=0.1, down=0.05,
+				sr=list(model='bevholt', params=params(brp))),
 			# effort dynamics
 			"ED0.1"=effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),
 				sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]]),

@@ -84,19 +84,32 @@ oneWayTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 
 # rollerCoaster {{{
 rollerCoaster <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
-	years=2:dims(stk)$maxyear) {
+	fmsy=refpts(brp)['msy', 'harvest'], years=2:dims(stk)$maxyear, up=0.05, down=0.04) {
 
+	# F
+	f <- rep(NA, length(years))
 
 	# limits
 	f0 <- c(fbar(stk)[,1])
 	fmax <- c(fmax)
-	rate <- exp((log(fmax) - log(f0)) / (length(years)))
 
 	# linear trend
-	f <- rate^(0:59)*f0
+	rateup <- log(fmax/f0) / log(1 + up)
+	fup <- f0 * ((1 + up) ^ (0:ceiling(rateup)))
+	lfup <- length(fup)
+	f[1:lfup] <- fup
+
+	# at the top
+	f[lfup:(lfup+5)] <- fup[lfup]
+
+	# coming down!
+	ratedo <- log(fmsy/f[length(fup)+5]) / log(1 + down)
+	fdo <- f[lfup+5] * ((1 + down) ^ (0:ceiling(ratedo)))
+	lfdo <- length(f) - (lfup +6) + 1
+	f[(lfup+6):length(f)] <- fdo[1:lfdo]
 	
 	# fwdControl
-	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f[-1]))
+	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f))
 
 	# SR residuals
 	srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
