@@ -5,7 +5,7 @@
 # Maintainer: Iago Mosqueira, JRC
 # $Id: $
 
-library(FLAdvice)
+library(FLBRP)
 
 source('functions.R')
 
@@ -23,21 +23,21 @@ input <- list()
 sce <- list(
 	# LH
 	LH=list(
-	# SP Small Pelagic: Linf=30cm, ages=1:8, fbar=2:8, steep=0.7
+	# SP Small Pelagic: Linf=30cm, ages=1:8, fbar=2:8, steep=0.70
 		SP=list(
 			par=FLPar(linf=30, sl=2, sr=120, a1=2, s=0.70, v=vBiomass),
 			range=c(min=1, max=8, minfbar=2, maxfbar=8, plusgroup=8)),
-# 	DE Demersal: Linf=70cm, ages=1:20, fbar=2:20, steep=0.8
+# 	DE Demersal: Linf=70cm, ages=1:20, fbar=2:20, steep=0.80
 		DE=list(
 			par=FLPar(linf=70, sl=2, sr=120, a1=2, s=0.80, v=vBiomass),
 			range=c(min=1, max=20, minfbar=4, maxfbar=20, plusgroup=20)),
-# 	LP Large Pelagic: Linf=150cm, ages=1:20, fbar=6:30, steep=0.85
+# 	LP Large Pelagic: Linf=150cm, ages=1:20, fbar=6:30, steep=0.80
 		LP=list(
 			par=FLPar(linf=150, sl=2, sr=120, a1=2, s=0.80, v=vBiomass),
 			range=c(min=1, max=20, minfbar=4, maxfbar=20, plusgroup=20))),
 # Initial depletion: ID0, ID30, ID60
 	ID=list(ID0=1, ID30=0.70, ID60=0.40),
-# Effort/F dynamics, x value: ED0, ED0.1, ED0.3, ED0.6
+# Effort/F dynamics, x value: RC, ED0, ED0.3, OW
 	ED=list(RC=0.80, ED0.1=0.1, ED0.6=0.6, OW=0.80),
 # TODO Selectivity: SELFD, SELF, SELD, SELDF
 	SEL=list(SELFD=NA, SELD=NA, SELDF=NA, SELF=NA),

@@ -8,10 +8,12 @@
 # Overall plot of SSB
 fqs <- FLQuants(lapply(sims, function(x) ssb(x$stock)))
 fqc <- FLQuants(lapply(sims, function(x) catch(x$stock)))
+fqh <- FLQuants(lapply(sims, function(x) fbar(x$stock)))
 
 pdf(file="out/overallPlot.pdf")
-print(xyplot(data~year|qname, fqs, strip=FALSE, type='l', ylab='SSB'))
-print(xyplot(data~year|qname, fqc, strip=FALSE, type='l', ylab='catch'))
+print(xyplot(data~year|qname, fqs, strip=TRUE, type='l', ylab='SSB'))
+print(xyplot(data~year|qname, fqc, strip=TRUE, type='l', ylab='catch'))
+print(xyplot(data~year|qname, fqh, strip=TRUE, type='l', ylab='F'))
 dev.off()
 
 # One page report per dataset
