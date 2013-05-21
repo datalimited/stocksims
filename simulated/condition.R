@@ -6,6 +6,8 @@
 # $Id: $
 
 library(FLBRP)
+library(FLash)
+library(FLAssess)
 
 source('functions.R')
 
@@ -41,6 +43,8 @@ sce <- list(
 	ED=list(RC=0.80, ED0.1=0.1, ED0.6=0.6, OW=0.80),
 # TODO Selectivity: SELFD, SELF, SELD, SELDF
 	SEL=list(SELFD=NA, SELD=NA, SELDF=NA, SELF=NA),
+# Underreporting: UR0, UR50
+	UR=list(UR0=0, UR25=0.50),
 # Length of time series (years): TS20, TS40, TS60
 	TS=list(TS20=20, TS60=60)
 ) # }}}
@@ -79,34 +83,49 @@ for(lh in names(sce$LH)) {
 				sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]])
 			)
 			# SEL
-				sel <- "SELF"
+			sel <- "SELF"
 				# TS
 				for(ts in names(sce$TS)) {
 					stock <- stk[,seq(nyears-sce$TS[[ts]]+1, nyears)]
-						# VAL
-						val[1,] <- c(lh, sce$ID[[id]], ed, sel, sce$TS[[ts]])
-						# NAME
-						name <- paste(lh, id, ed, sel, ts, sep="_")
-						name(stock) <- name
-						desc(stock) <- paste(name, Sys.time())
-						# SIMS
-						sims[[name]] <- list(lh=par, code=name, stock=stock,
-							refpts=refpts(brp), val=val)
-						input[[name]] <- list(catch=as.data.frame(catch(stock))[,
-							c("year", "data")], linf=c(par['linf']), tmax=dims(stock)$max,
-							tmat=which(c(mat(brp)) > 0.5)[1]-1)
-						print(name)
+						# UR
+						for (ur in names(sce$UR)) {
+							##
+							# VAL
+							val[1,] <- c(lh, sce$ID[[id]], ed, sel, sce$UR[[ur]], sce$TS[[ts]])
+							# NAME
+							name <- paste(lh, id, ed, sel, ts, ur, sep="_")
+							name(stock) <- name
+							desc(stock) <- paste(name, Sys.time())
+							# SIMS
+							sims[[name]] <- list(lh=par, code=name, stock=stock,
+								refpts=refpts(brp), val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
+							
+							# INPUT
+							input[[name]] <- list(catch=as.data.frame(catch(stock)*(1-sce$UR[[ur]]))[,
+								c("year", "data")], linf=c(par['linf']), tmax=dims(stock)$max,
+								tmat=which(c(mat(brp)) > 0.5)[1]-1)
+							# NOISE in C
+							# UR 0.50
+							input[[name]] <- list(catch=as.data.frame(catch(stock)*(1-sce$UR[[ur]]))[,
+								c("year", "data")], linf=c(par['linf']), tmax=dims(stock)$max,
+								tmat=which(c(mat(brp)) > 0.5)[1]-1)
+							# SEL
+							print(name)
+						}
 				}
 		}
 	}
 } # }}}
 
+
+# ED 1.20BMSY
+
 # save RData
 save(sims, file=paste("out/sims", format(Sys.time(), "%Y%m%d%H%M"), ".RData", sep=""))
 save(input, file=paste("out/input", format(Sys.time(), "%Y%m%d%H%M"), ".RData", sep=""))
 
-# Sensitivity runs
-# Under-reporting catch %: UR0, UR10, UR25, UR50
+# Sensitivity runs:
+# effortDynamics to 1.2 BMSY
 
 # AR1 in rec
 # Error in C
