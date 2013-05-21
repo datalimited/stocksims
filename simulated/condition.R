@@ -49,7 +49,8 @@ sce <- list(
 val <- cbind(
 	LH=factor("SP", levels=names(sce$LH)),
 	SEL=factor("SELF", levels=names(sce$SEL)),
-	as.data.frame(lapply(sce[-c(1, 4)],
+	ED=factor("RC", levels=names(sce$ED)),
+	as.data.frame(lapply(sce[-c(1, 3, 4)],
 		function(x) factor(NA, levels=unlist(x))))
 )[,names(sce)] # }}}
 
@@ -63,7 +64,6 @@ for(lh in names(sce$LH)) {
 		stk <- setupStock(brp, iniBiomass=vBiomass * sce$ID[[id]], nyears)
 		# ED
 		for(ed in names(sce$ED)) {
-			print(ed)
 			stk <- switch(ed, 
 			# one way trip
 			"OW"=oneWayTrip(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
@@ -84,7 +84,7 @@ for(lh in names(sce$LH)) {
 				for(ts in names(sce$TS)) {
 					stock <- stk[,seq(nyears-sce$TS[[ts]]+1, nyears)]
 						# VAL
-						val[1,] <- c(lh, sce$ID[[id]], sce$ED[[ed]], sel, sce$TS[[ts]])
+						val[1,] <- c(lh, sce$ID[[id]], ed, sel, sce$TS[[ts]])
 						# NAME
 						name <- paste(lh, id, ed, sel, ts, sep="_")
 						name(stock) <- name
@@ -107,4 +107,6 @@ save(input, file=paste("out/input", format(Sys.time(), "%Y%m%d%H%M"), ".RData", 
 
 # Sensitivity runs
 # Under-reporting catch %: UR0, UR10, UR25, UR50
-	UR=list(UR0=0, UR10=10, UR25=25, UR50=50)
+
+# AR1 in rec
+# Error in C
