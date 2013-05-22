@@ -30,7 +30,8 @@ setupStock <- function(brp, iniBiomass, nyears) {
 } # }}}
 
 # effortDynamics {{{
-effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear, xp) {
+effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear, xp,
+	srres=rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)) {
 
 	for (year in years) {
 		har <- fbar(stk)[,year-1]
@@ -47,10 +48,10 @@ effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear, xp) {
 		fctl@trgtArray[,2,] <- c(eff)
 
 		# SR residuals
-		srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=year)), 0)
+		# srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=year)), 0)
 
 		# fwd
-		stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres)
+		stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres, sr.residuals.mult=TRUE)
     cat ("\r", round(100*year/nyears, digits=0), "% ", sep="")
 	}
 	cat("\n")
@@ -59,8 +60,7 @@ effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear, xp) {
 
 # oneWayTrip {{{
 oneWayTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
-	years=2:dims(stk)$maxyear) {
-
+	years=2:dims(stk)$maxyear, srres=rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)) {
 
 	# limits
 	f0 <- c(fbar(stk)[,1])
@@ -74,17 +74,18 @@ oneWayTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f[-1]))
 
 	# SR residuals
-	srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
+	#srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
 
 	# fwd
-	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres)
+	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres, sr.residuals.mult=TRUE)
 	
 	return(stk)
 } # }}}
 
 # rollerCoaster {{{
 rollerCoaster <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
-	fmsy=refpts(brp)['msy', 'harvest'], years=2:dims(stk)$maxyear, up=0.05, down=0.04) {
+	fmsy=refpts(brp)['msy', 'harvest'], years=2:dims(stk)$maxyear, up=0.05, down=0.04,
+	srres=rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)) {
 
 	# F
 	f <- rep(NA, length(years))
@@ -112,17 +113,18 @@ rollerCoaster <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f))
 
 	# SR residuals
-	srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
+	#srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
 
 	# fwd
-	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres)
+	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres, sr.residuals.mult=TRUE)
 	
 	return(stk)
 } # }}}
 
 # oneWayQuickTrip {{{
 oneWayQuickTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
-	rate=1.20, years=2:dims(stk)$maxyear) {
+	rate=1.20, years=2:dims(stk)$maxyear,
+	srres=rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)) {
 
 	# limits
 	f0 <- c(fbar(stk)[,1])
@@ -137,10 +139,22 @@ oneWayQuickTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f[-1]))
 
 	# SR residuals
-	srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
+	# srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
 
 	# fwd
 	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres)
 	
 	return(stk)
 } # }}}
+
+# ar1lnorm {{{
+ar1lnorm <- function(sd, rho, years) {
+
+	n <- length(years)
+	#
+	res <- arima.sim(model=list(ar=rho), rand.gen = function(n)
+		rnorm(n, sd=sd), n=n)
+
+	return(FLQuant(res, dimnames=list(year=years)))
+}
+# }}}

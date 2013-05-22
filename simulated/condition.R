@@ -39,6 +39,8 @@ sce <- list(
 			range=c(min=1, max=20, minfbar=4, maxfbar=20, plusgroup=20))),
 # Initial depletion: ID0, ID30, ID60
 	ID=list(ID0=1, ID30=0.70, ID60=0.40),
+# Autocorrelation in SR residuals
+	AR=list(AR=0.8, NR=0),
 # Effort/F dynamics, x value: RC, ED0, ED0.3, OW
 	ED=list(RC=0.80, ED0.1=0.1, ED0.6=0.6, OW=0.80),
 # TODO Selectivity: SELFD, SELF, SELD, SELDF
@@ -53,8 +55,9 @@ sce <- list(
 val <- cbind(
 	LH=factor("SP", levels=names(sce$LH)),
 	SEL=factor("SELF", levels=names(sce$SEL)),
+	AR=factor("NR", levels=names(sce$AR)),
 	ED=factor("RC", levels=names(sce$ED)),
-	as.data.frame(lapply(sce[-c(1, 3, 4)],
+	as.data.frame(lapply(sce[-c(1, 3, 4, 5)],
 		function(x) factor(NA, levels=unlist(x))))
 )[,names(sce)] # }}}
 
@@ -66,21 +69,29 @@ for(lh in names(sce$LH)) {
 	# ID
 	for(id in names(sce$ID)) {
 		stk <- setupStock(brp, iniBiomass=vBiomass * sce$ID[[id]], nyears)
+		# AR
+		for(ar in names(sce$AR)) {
+		srres <- switch(ar,
+			#
+			"NR"=rlnorm(iters, FLQuant(0, dimnames=list(year=2:nyears)), 0),
+			"AR"=ar1lnorm(years=2:nyears, sd=0.2, rho=0.8))
 		# ED
 		for(ed in names(sce$ED)) {
 			stk <- switch(ed, 
 			# one way trip
 			"OW"=oneWayTrip(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
-				sr=list(model='bevholt', params=params(brp)), years=2:nyears),
+				sr=list(model='bevholt', params=params(brp)), years=2:nyears, srres=srres),
 			# roller coaster
 			"RC"=rollerCoaster(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
 			fmsy=refpts(brp)['msy', 'harvest'], years=2:nyears, up=0.1, down=0.05,
-				sr=list(model='bevholt', params=params(brp))),
+				sr=list(model='bevholt', params=params(brp)), srres=srres),
 			# effort dynamics
 			"ED0.1"=effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),
-				sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]]),
+				sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]],
+				srres=srres),
 			"ED0.6"=effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),
-				sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]])
+				sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]],
+				srres=srres)
 			)
 			# SEL
 			sel <- "SELF"
@@ -91,32 +102,27 @@ for(lh in names(sce$LH)) {
 						for (ur in names(sce$UR)) {
 							##
 							# VAL
-							val[1,] <- c(lh, sce$ID[[id]], ed, sel, sce$UR[[ur]], sce$TS[[ts]])
+							val[1,] <- c(lh, sce$ID[[id]],  sce$AR[[ar]], ed, sel, sce$UR[[ur]],
+								sce$TS[[ts]])
 							# NAME
-							name <- paste(lh, id, ed, sel, ts, ur, sep="_")
+							name <- paste(lh, id, ar, ed, sel, ts, ur, sep="_")
 							name(stock) <- name
 							desc(stock) <- paste(name, Sys.time())
 							# SIMS
 							sims[[name]] <- list(lh=par, code=name, stock=stock,
 								refpts=refpts(brp), val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
-							
+							# NOISE in C
 							# INPUT
 							input[[name]] <- list(catch=as.data.frame(catch(stock)*(1-sce$UR[[ur]]))[,
 								c("year", "data")], linf=c(par['linf']), tmax=dims(stock)$max,
 								tmat=which(c(mat(brp)) > 0.5)[1]-1)
-							# NOISE in C
-							# UR 0.50
-							input[[name]] <- list(catch=as.data.frame(catch(stock)*(1-sce$UR[[ur]]))[,
-								c("year", "data")], linf=c(par['linf']), tmax=dims(stock)$max,
-								tmat=which(c(mat(brp)) > 0.5)[1]-1)
-							# SEL
 							print(name)
 						}
+				}
 				}
 		}
 	}
 } # }}}
-
 
 # ED 1.20BMSY
 
