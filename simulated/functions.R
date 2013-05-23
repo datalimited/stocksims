@@ -51,7 +51,7 @@ effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear, xp,
 		# srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=year)), 0)
 
 		# fwd
-		stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres, sr.residuals.mult=TRUE)
+		stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres[,ac(year)], sr.residuals.mult=TRUE)
     cat ("\r", round(100*year/nyears, digits=0), "% ", sep="")
 	}
 	cat("\n")
@@ -105,8 +105,8 @@ rollerCoaster <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 
 	# coming down!
 	ratedo <- log(fmsy/f[length(fup)+5]) / log(1 + down)
-	fdo <- f[lfup+5] * ((1 + down) ^ (0:ceiling(ratedo)))
 	lfdo <- length(f) - (lfup +6) + 1
+	fdo <- f[lfup+5] * ((1 + down) ^ seq(0, ceiling(ratedo), length=lfdo))
 	f[(lfup+6):length(f)] <- fdo[1:lfdo]
 	
 	# fwdControl
@@ -149,12 +149,11 @@ oneWayQuickTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 
 # ar1lnorm {{{
 ar1lnorm <- function(sd, rho, years) {
-
 	n <- length(years)
 	#
 	res <- arima.sim(model=list(ar=rho), rand.gen = function(n)
-		rnorm(n, sd=sd), n=n)
+		rnorm(n, mean=0, sd=sd), n=n)
 
-	return(FLQuant(res, dimnames=list(year=years)))
+	return(FLQuant(exp(res), dimnames=list(year=years)))
 }
 # }}}

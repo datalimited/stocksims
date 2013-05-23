@@ -11,9 +11,9 @@ fqc <- FLQuants(lapply(sims, function(x) catch(x$stock)))
 fqh <- FLQuants(lapply(sims, function(x) fbar(x$stock)))
 
 pdf(file="out/overallPlot.pdf")
-print(xyplot(data~year|qname, fqs, strip=TRUE, type='l', ylab='SSB'))
-print(xyplot(data~year|qname, fqc, strip=TRUE, type='l', ylab='catch'))
-print(xyplot(data~year|qname, fqh, strip=TRUE, type='l', ylab='F'))
+print(xyplot(data~year|qname, fqs, strip=TRUE, type='l', ylab='SSB',layout=c(6,6)))
+print(xyplot(data~year|qname, fqc, strip=TRUE, type='l', ylab='catch',layout=c(3,3)))
+print(xyplot(data~year|qname, fqh, strip=TRUE, type='l', ylab='F',layout=c(6,6)))
 dev.off()
 
 # One page report per dataset
