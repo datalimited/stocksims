@@ -129,7 +129,6 @@ set.seed(1973)
 sims <- lapply(sims, function(x) {
 	# Normal error with CV=20%
 	x$catchE <- rnorm(500, x$catch, mean(x$catch) * 0.20)
-	x$catchEDF <- as.data.frame(x$catchE)[,c('year', 'iter', 'data')]
 	return(x)
 	})
 
