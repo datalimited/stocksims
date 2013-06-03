@@ -6,7 +6,7 @@
 # $Id: $
 
 # setupStock {{{
-setupStock <- function(brp, iniBiomass, nyears) {
+setupStock <- function(brp, iniBiomass, nyears, iters=1) {
 	
 	# find corresponding F
 	idx <- max(which(ssb(brp) <= iniBiomass)[1], 2)
@@ -108,6 +108,42 @@ rollerCoaster <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	lfdo <- length(f) - (lfup +6) + 1
 	fdo <- f[lfup+5] * ((1 + down) ^ seq(0, ceiling(ratedo), length=lfdo))
 	f[(lfup+6):length(f)] <- fdo[1:lfdo]
+	
+	# fwdControl
+	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f))
+
+	# SR residuals
+	#srres <- rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)
+
+	# fwd
+	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres, sr.residuals.mult=TRUE)
+	
+	return(stk)
+} # }}}
+
+# rollerCoaster2 {{{
+rollerCoaster2 <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
+	fmsy=refpts(brp)['msy', 'harvest'], years=2:dims(stk)$maxyear, upy=25, top=5,
+	downy=(dims(stk)$maxyear)-(upy+top),
+	srres=rlnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)) {
+	
+	# F
+	f <- rep(NA, length(years))
+
+	# limits
+	f0 <- c(fbar(stk)[,1])
+	fmax <- c(fmax)
+
+	# linear trend up: 1:upy
+	fup <- seq(f0, fmax, length=upy)
+	f[1:upy] <- fup
+
+	# at the top: upy+1:upy+6
+	f[(upy+1):(upy+top-1)] <- fmax
+
+	# coming down!
+	fdo <- seq(fmax, fmsy, length=downy+2)[-1]
+	f[(upy+top):(upy+top+downy)] <- fdo
 	
 	# fwdControl
 	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f))

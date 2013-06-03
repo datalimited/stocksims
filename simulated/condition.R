@@ -5,9 +5,10 @@
 # Maintainer: Iago Mosqueira, JRC
 # $Id: $
 
+library(plyr)
 library(FLBRP)
-library(FLash)
 library(FLAssess)
+library(FLash)
 
 source('functions.R')
 
@@ -42,7 +43,7 @@ sce <- list(
 # Autocorrelation in SR residuals
 	AR=list(AR=0.8, NR=0),
 # Effort/F dynamics, x value: RC, ED0, ED0.3, OW
-	ED=list(RC=0.80, ED0=0, ED0.6=0.6, OW=0.80),
+	ED=list(ED0=0, ED0.6=0.6, OW=0.80, RC=0.80),
 # TODO Selectivity: SELFD, SELF, SELD, SELDF
 	SEL=list(SELFD=NA, SELD=NA, SELDF=NA, SELF=NA),
 # Underreporting: UR0, UR50
@@ -61,7 +62,7 @@ val <- data.frame(
 	UR=NA,
 	TS=NA) # }}}
 
-# Input list {{{
+# RUN for sims and input {{{
 # LH
 for(lh in names(sce$LH)) {
 	par <- gislasim(sce$LH[[lh]]$par)
@@ -73,7 +74,7 @@ for(lh in names(sce$LH)) {
 		for(ar in names(sce$AR)) {
 		srres <- switch(ar,
 			#
-			"NR"=rlnorm(iters, FLQuant(0, dimnames=list(year=2:nyears)), 0),
+			"NR"=rlnorm(iters, FLQuant(0, dimnames=list(year=2:nyears)), 0.2),
 			"AR"=ar1lnorm(sd=0.2, rho=0.8, years=2:nyears))
 		# ED
 		for(ed in names(sce$ED)) {
@@ -85,6 +86,10 @@ for(lh in names(sce$LH)) {
 			# roller coaster
 			"RC"=rollerCoaster(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
 				fmsy=refpts(brp)['msy', 'harvest'], years=2:nyears, up=0.1, down=0.05,
+				sr=list(model='bevholt', params=params(brp)), srres=srres),
+			# RC2
+			"RC2"=rollerCoaster2(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
+				fmsy=refpts(brp)['msy', 'harvest'], years=2:nyears, upy=25, top=5, downy=30,
 				sr=list(model='bevholt', params=params(brp)), srres=srres),
 			# effort dynamics
 			"ED0"=effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),

@@ -8,3 +8,14 @@
 - CONTRAST in time series
 
 - Catch ERROR, 20% CV rlnorm
+
+# 20130522
+
+Bug in fwd()
+
+[1] "DE_ID0_AR_ED0.1_SELF_UR25_TS60"
+
+[1] "LP_ID30_AR_ED0.1_SELF_UR25_TS60"
+
+[1] "LP_ID30_NR_RC_SELF_UR25_TS60"
+
