@@ -122,7 +122,7 @@ for(lh in names(sce$LH)) {
 	}
 } # }}}
 
-# Error in C: 30% CV
+# Error in C: 30% CV {{{
 set.seed(1973)
 
 # Add catchE
@@ -159,7 +159,7 @@ for (i in 1:500) {
 		inputE[[i]][[j]]$catch <- inputTMP[[j]][[i]]
 		inputE[[i]][[j]][c('linf', 'tmax', 'tmat')] <- input[[j]][c('linf', 'tmax', 'tmat')]
 	}
-}
+} # }}}
 
 # ED 1.20BMSY
 
