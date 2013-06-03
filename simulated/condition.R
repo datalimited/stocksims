@@ -13,7 +13,7 @@ library(FLash)
 source('functions.R')
 
 # VARS
-set.seed(1973)
+set.seed(666)
 nyears <- 60
 iters <- 1
 vBiomass <- 1000
@@ -116,8 +116,9 @@ for(lh in names(sce$LH)) {
 						desc(stock) <- paste(name, Sys.time())
 						# SIMS
 						sims[[name]] <- list(lh=par, code=name, stock=stock,
-							refpts=refpts(brp), val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
-						# NOISE in C
+						refpts=refpts(brp), val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
+save(sims, file=paste("out/simsTMP", ".RData", sep=""))
+save(input, file=paste("out/inputTMP", ".RData", sep=""))
 						print(name)
 						gc()
 					}
@@ -128,7 +129,6 @@ for(lh in names(sce$LH)) {
 } # }}}
 
 # Error in C: 30% CV {{{
-set.seed(1973)
 
 # Add catchE
 sims <- lapply(sims, function(x) {
@@ -171,4 +171,5 @@ for (i in 1:500) {
 # save RData
 save(sims, file=paste("out/sims", format(Sys.time(), "%Y%m%d%H%M"), ".RData", sep=""))
 save(input, file=paste("out/input", format(Sys.time(), "%Y%m%d%H%M"), ".RData", sep=""))
-save(inputE, file=paste("out/inputE", format(Sys.time(), "%Y%m%d%H%M"), ".RData", sep=""))
+save(inputE, file=paste("out/inputE", format(Sys.time(), "%Y%m%d%H%M"),
+	".RData", sep=""))
