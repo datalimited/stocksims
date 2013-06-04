@@ -15,7 +15,7 @@ source('functions.R')
 # VARS
 set.seed(666)
 nyears <- 60 # Max. number of years
-iters <- 500 # No. of replicates for SR residuals
+iters <- 250 # No. of replicates for SR residuals
 vBiomass <- 1000 # Initial VBiomass
 margSD <- 0.6 # Marginal SD of AR1 process
 rsd <- 0.2 # Log SD of SR residuals
@@ -51,7 +51,7 @@ sce <- list(
 # Underreporting: UR0, UR50
 	UR=list(UR0=0, UR50=0.50),
 # Length of time series (years): TS20, TS60
-	TS=list(TS20=20, TS60=60)
+	TS=list(TS60=60, TS20=20)
 ) # }}}
 
 # val: VAL {{{
@@ -69,70 +69,71 @@ val <- data.frame(
 for(lh in names(sce$LH)) {
 	par <- gislasim(sce$LH[[lh]]$par)
 	brp <- lh(par, range=sce$LH[[lh]]$range)
-	# ID
-	for(id in names(sce$ID)) {
-		stk <- setupStock(brp, iniBiomass=vBiomass * sce$ID[[id]], nyears)
-		# AR
-		for(ar in names(sce$AR)) {
-		srres <- switch(ar,
-			#
-			"NR"=rlnorm(iters, FLQuant(0, dimnames=list(year=2:nyears)), sdlog=rsd),
-			"AR"=ar1lnorm(rho=0.8, years=2:nyears, margSD=margSD))
-		# ED
-		for(ed in names(sce$ED)) {
-			stk <- switch(ed, 
-			# one way trip
-			"OW"=oneWayTrip(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
-				sr=list(model='bevholt', params=params(brp)), years=2:nyears, srres=srres),
-			# roller coaster
-			"RC"=rollerCoaster(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
-				fmsy=refpts(brp)['msy', 'harvest'], years=2:nyears, up=0.1, down=0.05,
-				sr=list(model='bevholt', params=params(brp)), srres=srres),
-			# RC2
-			"RC2"=rollerCoaster2(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
-				fmsy=refpts(brp)['msy', 'harvest'], years=2:nyears, upy=25, top=5, downy=30,
-				sr=list(model='bevholt', params=params(brp)), srres=srres),
-			# effort dynamics
-			"ED0"=effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),
-				sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]],
-				srres=srres),
-			"ED0.6"=effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),
-				sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]],
-				srres=srres)
-			)
-			# SEL
-			sel <- "SELF"
-				# TS
-				for(ts in names(sce$TS)) {
-					stock <- stk[,seq(nyears-sce$TS[[ts]]+1, nyears)]
-					# UR
-					for (ur in names(sce$UR)) {
-						##
-						# VAL
-						val[1,] <- c(lh, sce$ID[[id]],  sce$AR[[ar]], ed, sel, sce$UR[[ur]],
-							sce$TS[[ts]])
-						# NAME
-						name <- paste(lh, id, ar, ed, sel, ur, ts, sep="_")
-						name(stock) <- name
-						desc(stock) <- paste(name, Sys.time())
-						# SIMS
-						sims[[name]] <- list(lh=par, code=name, stock=stock,
-						refpts=refpts(brp), val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
-						print(name)
-						gc()
-					}
-				}
-			}
-		}
-	}
-} # }}}
+
+# AR
+for(ar in names(sce$AR)) {
+	srres <- switch(ar,
+	"NR"=rlnorm(iters, FLQuant(0, dimnames=list(year=2:nyears)), sd=rsd),
+	"AR"=ar1rnorm(rho=0.8, iters=iters, years=2:nyears, margSD=margSD))
+
+# ID
+for(id in names(sce$ID)) {
+	stk <- setupStock(brp, iniBiomass=vBiomass * sce$ID[[id]], nyears)
+
+# ED
+for(ed in names(sce$ED)) {
+	stock <- switch(ed, 
+	# one way trip
+	"OW"=oneWayTrip(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
+		sr=list(model='bevholt', params=params(brp)), years=2:nyears, srres=srres),
+	# roller coaster
+	"RC"=rollerCoaster(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
+		fmsy=refpts(brp)['msy', 'harvest'], years=2:nyears, up=0.1, down=0.05,
+		sr=list(model='bevholt', params=params(brp)), srres=srres),
+	# RC2
+	"RC2"=rollerCoaster2(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
+		fmsy=refpts(brp)['msy', 'harvest'], years=2:nyears, upy=25, top=5, downy=30,
+		sr=list(model='bevholt', params=params(brp)), srres=srres),
+	# effort dynamics
+	"ED0"=effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),
+		sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]],
+		srres=srres),
+	"ED0.6"=effortDynamics(stk, bmsy=c(refpts(brp)['msy', 'ssb']),
+		sr=list(model='bevholt', params=params(brp)), years=2:nyears, xp=sce$ED[[ed]],
+		srres=srres)
+	)
+# SEL
+sel <- "SELF"
+# TS
+for(ts in names(sce$TS)) {
+	stock <- stock[,seq(nyears-sce$TS[[ts]]+1, nyears)]
+
+# UR
+for (ur in names(sce$UR)) {
+	
+# VAL
+val[1,] <- c(lh, sce$ID[[id]],  sce$AR[[ar]], ed, sel, sce$UR[[ur]],
+	sce$TS[[ts]])
+
+# NAME
+name <- paste(lh, id, ar, ed, sel, ur, ts, sep="_")
+name(stock) <- name
+desc(stock) <- paste(name, Sys.time())
+
+# SIMS
+sims[[name]] <- list(lh=par, code=name, stock=stock,
+refpts=refpts(brp), val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
+print(name)
+gc()
+}}}}}} # }}}
 
 # Error in C: 30% CV {{{
 
 # Add catchE
 sims <- lapply(sims, function(x) {
 	# Normal error with CV=20%
-	x$catchE <- rnorm(500, x$catch, mean(x$catch) * 0.20)
+	x$catchE <- FLQuant(rnorm(iters, c(x$catch), c(mean(x$catch)) * 0.20),
+		dimnames=dimnames(x$catch))
 	return(x)
 	})
 
@@ -154,9 +155,9 @@ input <- lapply(sims, function(x) {
 inputTMP <- lapply(sims, function(x)
 	dlply(as.data.frame(x$catchE)[,c('year', 'iter', 'data')], 'iter', subset))
 
-inputE <- vector('list', length=500)
-names(inputE) <- paste('iter', 1:500, sep="")
-for (i in 1:500) {
+inputE <- vector('list', length=iters)
+names(inputE) <- paste('iter', 1:iters, sep="")
+for (i in 1:iters) {
 	inputE[[i]] <- vector('list', length=length(inputTMP))
 	names(inputE[[i]]) <- names(sims)
 	for (j in 1:length(inputTMP)) {

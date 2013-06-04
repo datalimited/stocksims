@@ -1,51 +1,25 @@
 # plots.R - DESC
 # plots.R
 
-# Copyright 2003-2012 FLR Team. Distributed under the GPL 2 or later
+# Copyright 2003-2013 FLR Team. Distributed under the GPL 2 or later
 # Maintainer: Iago Mosqueira, JRC
 # $Id: $
-
-# Overall plot of SSB
-fqs <- FLQuants(lapply(sims, function(x) ssb(x$stock)))
-fqc <- FLQuants(lapply(sims, function(x) catch(x$stock)))
-fqh <- FLQuants(lapply(sims, function(x) fbar(x$stock)))
-
-pdf(file="out/overallPlot.pdf")
-print(xyplot(data~year|qname, fqs, strip=TRUE, type='l', ylab='SSB',layout=c(6,6)))
-print(xyplot(data~year|qname, fqc, strip=TRUE, type='l', ylab='catch',layout=c(3,3)))
-print(xyplot(data~year|qname, fqh, strip=TRUE, type='l', ylab='F',layout=c(6,6)))
-dev.off()
-
-# One page report per dataset
-
-# stock
-
-# df
-# ssb, tb, catch, refpts, ssb/ssbMSY
-# Overall plot of temporal trend of Catch as a function of factorial design of simulation
-fqc <- (lapply(out, function(x) as.data.frame(catch(x$stock))))
-fqc<-ldply(fqc, data.frame)
-fqlh<-(lapply(out, function(x) as.data.frame(x$val$LH)))
-fqlh<-ldply(fqlh, data.frame)
-fqid<-(lapply(out, function(x) as.data.frame(x$val$ID)))
-fqid<-ldply(fqid, data.frame)
-fqed<-(lapply(out, function(x) as.data.frame(x$val$ED)))
-fqed<-ldply(fqed, data.frame)
-fqsel<-(lapply(out, function(x) as.data.frame(x$val$SEL)))
-fqsel<-ldply(fqsel, data.frame)
-fqts<-(lapply(out, function(x) as.data.frame(x$val$TS)))
-fqts<-ldply(fqts, data.frame)
-fqur<-(lapply(out, function(x) as.data.frame(x$val$UR)))
-fqur<-ldply(fqur, data.frame)
+# Created:
+# Modified:
 
 
-fqF<-merge(fqc, fqlh, by=".id", all.x=TRUE)
-fqF<-merge(fqF, fqid, by=".id", all.x=TRUE)
-fqF<-merge(fqF, fqed, by=".id", all.x=TRUE)
-fqF<-merge(fqF, fqsel, by=".id", all.x=TRUE)
-fqF<-merge(fqF, fqts, by=".id", all.x=TRUE)
-fqF<-merge(fqF, fqur, by=".id", all.x=TRUE)
+# 
+val <- lapply(sims, function(x) cbind(x$val, as.data.frame(x$catch)))
+val <- do.call('rbind', val)
 
-names(fqF)<-c("stock","age","year","unit","season","area","iter","data","LH","ID","ED","TS","SEL","X1Lx","X2L","X1", "X2" ,"UR")
+ggplot(val, aes(year, data)) + geom_point() + stat_smooth(se=TRUE) + facet_grid(TS+ED+AR~LH+UR+ID)
 
-ggplot(fqF,aes(year,data, color=UR))+geom_line()+facet_grid(TS+ID+SEL~ED+LH, scales="free", labeller = label_both)+xlab("Year")+ylab("Catch")
+
+
+
+ggplot(qdf, aes(x = year, y = Q50)) +
+    geom_line(size = 2, color = 'navyblue') +
+    geom_ribbon(aes(ymin = Q25, ymax = Q75), fill = 'blue', alpha = 0.4) +
+    geom_ribbon(aes(ymin = Q5, ymax = Q25), fill = 'blue', alpha = 0.2) +
+    geom_ribbon(aes(ymin = Q75, ymax = Q95), fill = 'blue', alpha = 0.2) +
+    labs(x = 'Year', y = 'Y')

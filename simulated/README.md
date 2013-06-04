@@ -34,3 +34,13 @@
 - CONTRAST in time series
 
 - Catch ERROR, 20% CV rlnorm
+
+# GRID
+
+- LH (3) SP, DE, LP
+- AR (2) NR, AR
+- ID (3) ID0, ID30, ID60
+- ED (4) ED0, ED0.6, OW, RC
+- TS (2) TS20, TS60
+- UR (2) UR0, UR50
+

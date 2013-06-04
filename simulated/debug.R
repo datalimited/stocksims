@@ -9,6 +9,7 @@
 
 # Strange catch trends in LP_ID0_NR_OW_SELF_UR0_TS60
 bug <- sims[["LP_ID0_NR_OW_SELF_UR0_TS60"]]
+bug <- sims[["LP_ID0_AR_OW_SELF_UR0_TS60"]]
 bug <- simsOW[["LP_ID0_NR_OW_SELF_UR0_TS60"]]
 
 plot(catch(bug$stock))
