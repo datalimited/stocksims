@@ -32,11 +32,11 @@ sce <- list(
 		SP=list(
 			par=FLPar(linf=30, sl=2, sr=120, a1=2, s=0.70, v=vBiomass),
 			range=c(min=1, max=8, minfbar=2, maxfbar=8, plusgroup=8)),
-# 	DE Demersal: Linf=70cm, ages=1:20, fbar=2:20, steep=0.80
+	# DE Demersal: Linf=70cm, ages=1:20, fbar=2:20, steep=0.80
 		DE=list(
 			par=FLPar(linf=70, sl=2, sr=120, a1=2, s=0.80, v=vBiomass),
 			range=c(min=1, max=20, minfbar=4, maxfbar=20, plusgroup=20)),
-# 	LP Large Pelagic: Linf=150cm, ages=1:20, fbar=6:30, steep=0.80
+	# LP Large Pelagic: Linf=150cm, ages=1:20, fbar=6:30, steep=0.80
 		LP=list(
 			par=FLPar(linf=150, sl=2, sr=120, a1=2, s=0.80, v=vBiomass),
 			range=c(min=1, max=20, minfbar=4, maxfbar=20, plusgroup=20))),
@@ -127,7 +127,6 @@ print(name)
 gc()
 
 }}}}} #
-save(sims, input, file="out/dumpRUN.RData") 
 } # }}}
 
 # Error in C: 30% CV {{{

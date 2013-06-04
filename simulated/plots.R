@@ -10,14 +10,9 @@
 library(ggplot2)
 
 # 
-val <- lapply(res$sims, function(x) cbind(x$val, as.data.frame(FLQuantPoint(x$catch))))
+val <- lapply(sims, function(x) cbind(x$val, as.data.frame(x$catch)))
 val <- do.call('rbind', val)
 
 #
-ggplot(val) + geom_line(aes(x=year, y=data, group=iter, lty=iter)) + stat_smooth(se=TRUE) + facet_grid(TS+ED+AR~LH+UR+ID)
-
-
-
-head(as.data.frame(FLQuantPoint(m(ple4)))) 
-ggplot(res) + geom_line(aes(x=year,y=data,group=iter,size=iter,lty=iter))
+ggplot(val) + geom_line(aes(x=year, y=data)) + facet_grid(TS+ED+AR~LH+UR+ID)
 
