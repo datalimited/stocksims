@@ -7,19 +7,17 @@
 # Created:
 # Modified:
 
+library(ggplot2)
 
 # 
-val <- lapply(sims, function(x) cbind(x$val, as.data.frame(x$catch)))
+val <- lapply(res$sims, function(x) cbind(x$val, as.data.frame(FLQuantPoint(x$catch))))
 val <- do.call('rbind', val)
 
-ggplot(val, aes(year, data)) + geom_point() + stat_smooth(se=TRUE) + facet_grid(TS+ED+AR~LH+UR+ID)
+#
+ggplot(val) + geom_line(aes(x=year, y=data, group=iter, lty=iter)) + stat_smooth(se=TRUE) + facet_grid(TS+ED+AR~LH+UR+ID)
 
 
 
+head(as.data.frame(FLQuantPoint(m(ple4)))) 
+ggplot(res) + geom_line(aes(x=year,y=data,group=iter,size=iter,lty=iter))
 
-ggplot(qdf, aes(x = year, y = Q50)) +
-    geom_line(size = 2, color = 'navyblue') +
-    geom_ribbon(aes(ymin = Q25, ymax = Q75), fill = 'blue', alpha = 0.4) +
-    geom_ribbon(aes(ymin = Q5, ymax = Q25), fill = 'blue', alpha = 0.2) +
-    geom_ribbon(aes(ymin = Q75, ymax = Q95), fill = 'blue', alpha = 0.2) +
-    labs(x = 'Year', y = 'Y')

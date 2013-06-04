@@ -20,6 +20,7 @@ sce$UR <- sce$UR['UR0']
 sce$TS <- sce$TS['TS60']
 
 #
+sce$ED <- sce$ED[c('OW', 'RC', 'RC2')]
 sce$ED <- sce$ED['OW']
 sce$ED <- sce$ED['RC']
 sce$ED <- sce$ED['RC2']
@@ -42,3 +43,11 @@ srres<-ar1lnorm(sd=0.2, rho=0.8, years=2:nyears)
 
 # 1. ADD iters to ar1lnorm
 # 2. TEST ED w/ iters
+
+# doMC
+
+library(doMC)
+registerDoMC(3)
+
+foreach(i=1:3) %dopar% sqrt(i)
+

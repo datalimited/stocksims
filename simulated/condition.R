@@ -45,7 +45,7 @@ sce <- list(
 # Autocorrelation in SR residuals
 	AR=list(AR=0.8, NR=0),
 # Effort/F dynamics, x value: RC, ED0, ED0.3, OW
-	ED=list(ED0=0, ED0.6=0.6, OW=0.80, RC=0.80),
+	ED=list(ED0=0, ED0.6=0.6, OW=0.80, RC=0.80, RC2=0.80),
 # TODO Selectivity: SELFD, SELF, SELD, SELDF
 	SEL=list(SELFD=NA, SELD=NA, SELDF=NA, SELF=NA),
 # Underreporting: UR0, UR50
@@ -66,7 +66,8 @@ val <- data.frame(
 
 # RUN for sims and input {{{
 # LH
-for(lh in names(sce$LH)) {
+#for(lh in names(sce$LH)) {
+res <- foreach(lh=names(sce$LH)) %dopar% {
 	par <- gislasim(sce$LH[[lh]]$par)
 	brp <- lh(par, range=sce$LH[[lh]]$range)
 
@@ -123,9 +124,17 @@ desc(stock) <- paste(name, Sys.time())
 # SIMS
 sims[[name]] <- list(lh=par, code=name, stock=stock,
 refpts=refpts(brp), val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
+
 print(name)
 gc()
-}}}}}} # }}}
+
+}}}}} #
+#save(sims, input, file="out/dumpRUN.RData") 
+list(sims, input)
+} # }}}
+
+sims <- res$sims
+input <- res$input
 
 # Error in C: 30% CV {{{
 
