@@ -43,9 +43,9 @@ effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear, xp,
 	
 		# fwdControl
 		fctl <- fwdControl(data.frame(year=year, quantity='f', val=c(eff)[1]))
-		fctl@trgtArray <- array(NA, dim=c(1,3,iters),
-			dimnames=list(year, c('min','val','max'), iter=1:iters))
-		fctl@trgtArray[,2,] <- c(eff)
+		#fctl@trgtArray <- array(NA, dim=c(1,3,iters),
+		#	dimnames=list(year, c('min','val','max'), iter=1:iters))
+		#fctl@trgtArray[,2,] <- c(eff)
 
 		# fwd
 		stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres[,ac(year)], sr.residuals.mult=TRUE)

@@ -75,7 +75,6 @@ for(ar in names(sce$AR)) {
 	srres <- switch(ar,
 	"NR"=rlnorm(iters, FLQuant(0, dimnames=list(year=2:nyears)), sd=rsd),
 	"AR"=ar1rnorm(rho=0.8, iters=iters, years=2:nyears, margSD=margSD))
-
 # ID
 for(id in names(sce$ID)) {
 	stk <- setupStock(brp, iniBiomass=vBiomass * sce$ID[[id]], nyears)
