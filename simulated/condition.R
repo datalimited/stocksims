@@ -66,8 +66,7 @@ val <- data.frame(
 
 # RUN for sims and input {{{
 # LH
-#for(lh in names(sce$LH)) {
-res <- foreach(lh=names(sce$LH)) %dopar% {
+for(lh in names(sce$LH)) {
 	par <- gislasim(sce$LH[[lh]]$par)
 	brp <- lh(par, range=sce$LH[[lh]]$range)
 
@@ -129,12 +128,8 @@ print(name)
 gc()
 
 }}}}} #
-#save(sims, input, file="out/dumpRUN.RData") 
-list(sims, input)
+save(sims, input, file="out/dumpRUN.RData") 
 } # }}}
-
-sims <- res$sims
-input <- res$input
 
 # Error in C: 30% CV {{{
 
