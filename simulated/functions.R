@@ -6,7 +6,7 @@
 # $Id: $
 
 # setupStock {{{
-setupStock <- function(brp, iniBiomass, nyears, iters=1) {
+setupStock <- function(brp, iniBiomass, nyears) {
 	
 	# find corresponding F
 	idx <- max(which(ssb(brp) <= iniBiomass)[1], 2)
@@ -24,7 +24,7 @@ setupStock <- function(brp, iniBiomass, nyears, iters=1) {
 	stock(stk) <- computeStock(stk)
 
 	# add iters
-	stk <- propagate(stk, iters)
+	#stk <- propagate(stk, iters)
 
 	return(stk)
 } # }}}
@@ -142,8 +142,8 @@ rollerCoaster2 <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	f[(upy+1):(upy+top-1)] <- fmax
 
 	# coming down!
-	fdo <- seq(fmax, fmsy, length=downy+2)[-1]
-	f[(upy+top):(upy+top+downy)] <- fdo
+	fdo <- seq(fmax, fmsy, length=downy+1)[-1]
+	f[(upy+top):(upy+top+downy-1)] <- fdo
 	
 	# fwdControl
 	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f))
@@ -184,11 +184,17 @@ oneWayQuickTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 } # }}}
 
 # ar1lnorm {{{
-ar1lnorm <- function(sd, rho, years) {
+ar1lnorm <- function(rho, years, margSD=0.6) {
+
+	years <- 1:60
+	margSD <- 0.6
+
 	n <- length(years)
-	#
-	res <- arima.sim(model=list(ar=rho), rand.gen = function(n)
-		rnorm(n, mean=0, sd=sd), n=n)
+	rhosq <- rho ^ 2
+	
+	res <- rnorm(n, mean=0, sd=margSD)
+	for(i in 2:n) 
+		res[i] <- sqrt(rhosq) * res[i-1] + sqrt(1-rhosq) * res[i]
 
 	return(FLQuant(exp(res), dimnames=list(year=years)))
 }

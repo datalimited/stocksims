@@ -14,9 +14,11 @@ source('functions.R')
 
 # VARS
 set.seed(666)
-nyears <- 60
-iters <- 1
-vBiomass <- 1000
+nyears <- 60 # Max. number of years
+iters <- 500 # No. of replicates for SR residuals
+vBiomass <- 1000 # Initial VBiomass
+margSD <- 0.6 # Marginal SD of AR1 process
+rsd <- 0.2 # Log SD of SR residuals
 
 # SIMS & INPUT
 sims <- list()
@@ -74,11 +76,10 @@ for(lh in names(sce$LH)) {
 		for(ar in names(sce$AR)) {
 		srres <- switch(ar,
 			#
-			"NR"=rlnorm(iters, FLQuant(0, dimnames=list(year=2:nyears)), 0.2),
-			"AR"=ar1lnorm(sd=0.2, rho=0.8, years=2:nyears))
+			"NR"=rlnorm(iters, FLQuant(0, dimnames=list(year=2:nyears)), sdlog=rsd),
+			"AR"=ar1lnorm(rho=0.8, years=2:nyears, margSD=margSD))
 		# ED
 		for(ed in names(sce$ED)) {
-			print(paste(lh, id, ar, ed))
 			stk <- switch(ed, 
 			# one way trip
 			"OW"=oneWayTrip(stk, fmax=refpts(brp)['crash', 'harvest']*sce$ED[[ed]], 
@@ -117,8 +118,6 @@ for(lh in names(sce$LH)) {
 						# SIMS
 						sims[[name]] <- list(lh=par, code=name, stock=stock,
 						refpts=refpts(brp), val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
-save(sims, file=paste("out/simsTMP", ".RData", sep=""))
-save(input, file=paste("out/inputTMP", ".RData", sep=""))
 						print(name)
 						gc()
 					}
