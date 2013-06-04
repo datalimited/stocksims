@@ -18,7 +18,8 @@ nyears <- 60 # Max. number of years
 iters <- 250 # No. of replicates for SR residuals
 vBiomass <- 1000 # Initial VBiomass
 margSD <- 0.6 # Marginal SD of AR1 process
-rsd <- 0.2 # Log SD of SR residuals
+rsd <- 0.6 # Log SD of SR residuals
+rho <- 0.6 # AR rho
 
 # SIMS & INPUT
 sims <- list()
@@ -67,6 +68,8 @@ val <- data.frame(
 # RUN for sims and input {{{
 # LH
 for(lh in names(sce$LH)) {
+sims <- list()
+input <- list()
 	par <- gislasim(sce$LH[[lh]]$par)
 	brp <- lh(par, range=sce$LH[[lh]]$range)
 
@@ -74,7 +77,7 @@ for(lh in names(sce$LH)) {
 for(ar in names(sce$AR)) {
 	srres <- switch(ar,
 	"NR"=rlnorm(iters, FLQuant(0, dimnames=list(year=2:nyears)), sd=rsd),
-	"AR"=ar1rnorm(rho=0.8, iters=iters, years=2:nyears, margSD=margSD))
+	"AR"=ar1rnorm(rho=rho, iters=iters, years=2:nyears, margSD=margSD))
 # ID
 for(id in names(sce$ID)) {
 	stk <- setupStock(brp, iniBiomass=vBiomass * sce$ID[[id]], nyears)
@@ -124,10 +127,7 @@ sims[[name]] <- list(lh=par, code=name, stock=stock,
 refpts=refpts(brp), val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
 
 print(name)
-gc()
-
-}}}}} #
-} # }}}
+}}}}}
 
 # Error in C: 30% CV {{{
 
@@ -138,6 +138,10 @@ sims <- lapply(sims, function(x) {
 		dimnames=dimnames(x$catch))
 	return(x)
 	})
+
+# save RData
+save(sims, file=paste("out/sims", lh, format(Sys.time(), "%Y%m%d%H%M"),
+	".RData", sep=""))
 
 # input
 input <- lapply(sims, function(x) {
@@ -168,10 +172,17 @@ for (i in 1:iters) {
 	}
 } # }}}
 
+# save RData
+save(input, file=paste("out/input", lh, format(Sys.time(), "%Y%m%d%H%M"),
+	".RData", sep=""))
+save(inputE, file=paste("out/inputE", lh, format(Sys.time(), "%Y%m%d%H%M"),
+	".RData", sep=""))
+
+rm(inputTMP)
+gc()
+}
+# }}}
+
+
 # ED 1.20BMSY
 
-# save RData
-save(sims, file=paste("out/sims", format(Sys.time(), "%Y%m%d%H%M"), ".RData", sep=""))
-save(input, file=paste("out/input", format(Sys.time(), "%Y%m%d%H%M"), ".RData", sep=""))
-save(inputE, file=paste("out/inputE", format(Sys.time(), "%Y%m%d%H%M"),
-	".RData", sep=""))
