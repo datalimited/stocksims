@@ -168,21 +168,17 @@ oneWayQuickTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	return(stk)
 } # }}}
 
-# ar1norm {{{
-ar1rnorm <- function(rho, years, iters=1, margSD=0.6) {
-
-	#years <- 1:60
-	#margSD <- 0.6
-	#rho <- 0.8
+# ar1rlnorm {{{
+ar1rlnorm <- function(rho, years, iters=1, margSD=0.6) {
 
 	n <- length(years)
 	rhosq <- rho ^ 2
 	
-	res <- matrix(rlnorm(n*iters, meanlog=0, sdlog=margSD), nrow=n, ncol=iters)
+	res <- matrix(rnorm(n*iters, mean=0, sd=margSD), nrow=n, ncol=iters)
 	res <- apply(res, 2, function(x) {
 		for(i in 2:n)
 			x[i] <- sqrt(rhosq) * x[i-1] + sqrt(1-rhosq) * x[i]
-		return(x)
+		return(exp(x))
 	})
 
 	return(FLQuant(array(res, dim=c(1,n,1,1,1,iters)),

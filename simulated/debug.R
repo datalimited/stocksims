@@ -16,9 +16,12 @@ bug <- simsOW[["LP_ID0_NR_OW_SELF_UR0_TS60"]]
 
 plot(catch(bug$stock))
 
-sce$LH <- sce$LH['LP']
+sce$LH <- sce$LH['SP']
+
 sce$ID <- sce$ID['ID0']
+
 sce$UR <- sce$UR['UR0']
+
 sce$TS <- sce$TS['TS60']
 
 #
@@ -32,6 +35,27 @@ sce$ED <- sce$ED['ED0.6']
 sce$AR <- sce$AR['NR']
 
 debug(oneWayTrip)
+
+# Look at AR1 residuals
+sce$LH <- sce$LH['SP']
+sce$ED <- sce$ED[c('OW', 'RC', 'RC2')]
+iters <- 25
+
+
+#
+i <- 57
+x<-sims[[i]]
+
+plot(catch(x$stock), main=c("C", names(sims[i])))
+
+
+xyplot(data~year|iter, catch(x$stock), type='l', main=c("C", names(sims[i])))
+xyplot(data~year|iter, fbar(x$stock), type='l', main=c("F", names(sims[i])))
+
+plot(ssb(x$stock), main=c("SSB", names(sims[i])))
+plot(rec(x$stock), main=c("Rec", names(sims[i])))
+
+
 
 # Adding stochastic recruitment
 

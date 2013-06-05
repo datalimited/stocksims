@@ -18,7 +18,7 @@ nyears <- 60 # Max. number of years
 iters <- 250 # No. of replicates for SR residuals
 vBiomass <- 1000 # Initial VBiomass
 margSD <- 0.6 # Marginal SD of AR1 process
-rsd <- 0.2 # Log SD of SR residuals
+rsd <- 0.6 # Log SD of SR residuals
 rho <- 0.6 # AR rho
 
 # SIMS & INPUT
@@ -77,7 +77,7 @@ input <- list()
 for(ar in names(sce$AR)) {
 	srres <- switch(ar,
 	"NR"=rlnorm(iters, FLQuant(0, dimnames=list(year=2:nyears)), sd=rsd),
-	"AR"=ar1rnorm(rho=rho, iters=iters, years=2:nyears, margSD=margSD))
+	"AR"=ar1rlnorm(rho=rho, iters=iters, years=2:nyears, margSD=margSD))
 # ID
 for(id in names(sce$ID)) {
 	stk <- setupStock(brp, iniBiomass=vBiomass * sce$ID[[id]], nyears)
@@ -124,7 +124,7 @@ desc(stock) <- paste(name, Sys.time())
 
 # SIMS
 sims[[name]] <- list(lh=par, code=name, stock=stock,
-refpts=refpts(brp), val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
+	brp=brp, val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
 
 print(name)
 }
@@ -135,16 +135,16 @@ print(name)
 
 # Error in C: 30% CV {{{
 
-# Add catchE
+# Add catchE TODO
 sims <- lapply(sims, function(x) {
 	# Normal error with CV=20%
-	x$catchE <- FLQuant(rnorm(iters, c(x$catch), c(mean(x$catch)) * 0.20),
-		dimnames=dimnames(x$catch))
+	x$catchE <- FLQuant(aperm(apply(x$catch, 1:5, function(x) rnorm(iters, x, x* 0.20)),
+		c(2,3,4,5,6,1)), dimnames=dimnames(x$catch))
 	return(x)
 	})
 
 # save RData
-save(sims, file=paste("out/sims", lh, format(Sys.time(), "%Y%m%d%H%M"),
+save(sims, file=paste("out/", rsd, "/lh/sims", lh, format(Sys.time(), "%Y%m%d%H%M"),
 	".RData", sep=""))
 
 # input
@@ -177,9 +177,9 @@ for (i in 1:iters) {
 } # }}}
 
 # save RData
-save(input, file=paste("out/input", lh, format(Sys.time(), "%Y%m%d%H%M"),
+save(input, file=paste("out/", rsd, "/lh/input", lh, format(Sys.time(), "%Y%m%d%H%M"),
 	".RData", sep=""))
-save(inputE, file=paste("out/inputE", lh, format(Sys.time(), "%Y%m%d%H%M"),
+save(inputE, file=paste("out/", rsd, "/lh/inputE", lh, format(Sys.time(), "%Y%m%d%H%M"),
 	".RData", sep=""))
 
 rm(inputTMP)

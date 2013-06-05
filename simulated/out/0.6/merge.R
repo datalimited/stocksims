@@ -7,10 +7,6 @@
 # Created:
 # Modified:
 
-# XX {{{
-# }}}
-
-
 library(FLCore)
 
 files <- system('ls lh/*.RData', intern=TRUE)
