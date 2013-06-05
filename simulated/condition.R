@@ -18,7 +18,7 @@ nyears <- 60 # Max. number of years
 iters <- 250 # No. of replicates for SR residuals
 vBiomass <- 1000 # Initial VBiomass
 margSD <- 0.6 # Marginal SD of AR1 process
-rsd <- 0.6 # Log SD of SR residuals
+rsd <- 0.2 # Log SD of SR residuals
 rho <- 0.6 # AR rho
 
 # SIMS & INPUT
@@ -127,7 +127,11 @@ sims[[name]] <- list(lh=par, code=name, stock=stock,
 refpts=refpts(brp), val=val, catch=catch(stock)*(1-sce$UR[[ur]]))
 
 print(name)
-}}}}}
+}
+}
+}
+}
+}
 
 # Error in C: 30% CV {{{
 
@@ -183,6 +187,4 @@ gc()
 }
 # }}}
 
-
 # ED 1.20BMSY
-
