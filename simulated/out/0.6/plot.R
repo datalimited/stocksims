@@ -18,11 +18,6 @@ files <- system('ls lh/*.RData', intern=TRUE)
 idx <- files[grep('simsSP', files)]
 load(idx)
 
-###
-x <- sims[[1]]
-eval(as.list(model(x$brp))[[3]], c(as(params(x$brp), 'list'), list(ssb=ssb(x$stock))))
-###
-
 # wide data.frame w/ ssb, fbar, catch + val
 out <- lapply(sims, function(x)
 	cbind(model.frame(FLQuants(ssb=ssb(x$stock), rec=rec(x$stock),

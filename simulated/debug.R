@@ -33,6 +33,7 @@ sce$ED <- sce$ED['ED0']
 sce$ED <- sce$ED['ED0.6']
 
 sce$AR <- sce$AR['NR']
+sce$AR <- sce$AR['NE']
 
 debug(oneWayTrip)
 
@@ -77,3 +78,52 @@ registerDoMC(3)
 
 foreach(i=1:3) %dopar% sqrt(i)
 
+
+#
+
+combine <- function(x){
+	res <- model.frame(FLQuants(catch=x$catch, stock=stock(x$stock), harvest=harvest(x$stock)))
+	res <- cbind(res, bmsy=c(x$brp@refpts[2,5]))
+	res <- cbind(res, id=x$code)
+	res <- cbind(res, val=x$val)
+	return(res)
+}
+
+simout<-	ldply(sims[1:100], combine)
+
+for (i in seq(length(sims))[1:10]) {
+	x <- sims[[i]]
+	res <- model.frame(FLQuants(catch=x$catch, stock=stock(x$stock), harvest=harvest(x$stock)))
+	res <- cbind(res, bmsy=c(x$brp@refpts[2,5]))
+	res <- cbind(res, id=x$code)
+	res <- cbind(res, val=x$val)
+	write.table(res, file="TEST.csv", append=TRUE)
+}
+
+
+for (i in seq(length(sims))[1:10]) {
+	x <- sims[[i]]
+	res <- model.frame(FLQuants(catch=x$catch[,,,,,1:100], stock=stock(x$stock)[,,,,,1:100], harvest=harvest(x$stock)[,,,,,1:100]))
+	res <- cbind(res, bmsy=c(x$brp@refpts[2,5]))
+	res <- cbind(res, id=x$code)
+	res <- cbind(res, val=x$val)
+	if(i == 1)
+		write.table(res, sep=",", file="TEST.csv",
+			row.names=FALSE, col.names=TRUE)
+	else
+		write.table(res, sep=",", file="TEST.csv", append=TRUE,
+			row.names=FALSE, col.names=FALSE)
+}
+
+
+
+create table test (age text,year integer,unit text,season text,area text,iter integer,catch double,stock double,harvest double,bmsy double,id text,valLH text,valID text,valAR text,valED text,valSEL text,valUR text,valTS text);
+
+.separator ","
+.headers on
+.import TEST.csv test
+
+library(RSQLite)
+con <- dbConnect(SQLite(), dbname = "testR.db")
+dbWriteTable(con, "TEST", res, row.names = FALSE)
+dbDisconnect(con)

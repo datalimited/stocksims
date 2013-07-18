@@ -13,16 +13,16 @@ library(FLCore)
 load('out/0.6/sims06201306051031.RData')
 
 # sims 
-val <- lapply(sims06, function(x) cbind(x$val, as.data.frame(x$catch)))
+val <- lapply(sims, function(x) cbind(x$val, as.data.frame(x$catch)))
 val <- lapply(sims, function(x) cbind(x$val, as.data.frame(rec(x$stock))))
-val <- lapply(sims, function(x) cbind(x$val, as.data.frame(ssb(x$stock)[,,,,,1:10])))
+val <- lapply(sims, function(x) cbind(x$val, as.data.frame(ssb(x$stock))))
 val <- lapply(sims, function(x) cbind(x$val, as.data.frame(fbar(x$stock))))
 
 val <- do.call('rbind', val)
 
 #
-pdf(file="catchE.pdf")
-print(ggplot(val) + geom_point(aes(x=year, y=data), alpha=0.01) + facet_grid(TS+ED+AR~LH+UR+ID, scale='free_y'))
+pdf(file="DET.pdf")
+print(ggplot(val) + geom_line(aes(x=year, y=data)) + facet_grid(TS+ED+AR~LH+UR+ID, scale='free_y'))
 dev.off()
 
 # inputE

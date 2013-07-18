@@ -25,7 +25,9 @@ load(idx[3])
 for(i in 1:length(inputE06))
 	inputE06[[i]] <- c(inputE06[[i]], inputE[[i]])
 
-save(inputE06, file=paste("inputE06", format(Sys.time(), "%Y%m%d%H%M"),
+inputE <- inputE06
+
+save(inputE, file=paste("inputE06", format(Sys.time(), "%Y%m%d%H%M"),
 	".RData", sep=""))
 
 # sims
@@ -40,5 +42,7 @@ sims06 <- c(sims06, sims)
 load(idx[3])
 sims06 <- c(sims06, sims)
 
-save(sims06, file=paste("sims06", format(Sys.time(), "%Y%m%d%H%M"),
+sims <- sims06
+
+save(sims, file=paste("sims06", format(Sys.time(), "%Y%m%d%H%M"),
 	".RData", sep=""))
