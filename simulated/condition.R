@@ -8,7 +8,6 @@
 library(plyr)
 library(FLBRP)
 library(FLAssess)
-library(FLash)
 
 source('functions.R')
 
@@ -44,7 +43,7 @@ sce <- list(
 # Initial depletion: ID0, ID30, ID60
 	ID=list(ID0=1, ID30=0.70, ID60=0.40),
 # Autocorrelation in SR residuals
-	AR=list(AR=0.8, NR=0),
+	AR=list(AR=0.6, NR=0),
 # Effort/F dynamics, x value: RC, ED0, ED0.3, OW
 	ED=list(ED0=0, ED0.6=0.6, OW=0.80, RC=0.80),
 # TODO Selectivity: SELFD, SELF, SELD, SELDF
@@ -106,6 +105,7 @@ for(ed in names(sce$ED)) {
 	)
 # SEL
 sel <- "SELF"
+
 # TS
 for(ts in names(sce$TS)) {
 	stock <- stock[,seq(nyears-sce$TS[[ts]]+1, nyears)]
