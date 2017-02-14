@@ -7,10 +7,17 @@
 # Created:
 # Modified:
 
+# Objective is to create a set of simulated stock with a tree of different combination for properties listed below:
+
+# (1) Contrast, want scenarios for no contrast, one way trip and contrasted patterns
+
+# (2) LH, differnet life history traits are implementd using the equations derived by Gislason (2008), here 3 types of LH are implemented 
+
+
 library(FLAdvice)
 # library(FLBioDym)
 
-## Vars
+## Decide number of Years, Iterations and the exponent used in the effort dynamics (xp) in the implementation of Thorston 
 
 years <- 60
 iters <- 100
@@ -23,11 +30,13 @@ xp <- 0.109
 
 # (1) LH & selectivity
 # par
+# The gislasim() function input parameters are the L infinity (Linf), options for a selectivity function (sl), sr is ... , a1 , s.. ). call to gislasim creates the stock parameters that are then passed to the life history function (lh) which creates a biological reference point object (brp).  
 par <- gislasim(FLPar(linf=60, sl=20, sr=2, a1=4, s=0.6))
 brp <- lh(par)
 
 # (2) Initial depletion levels
 # stk at F level, SELECTIVITY
+# The brp object is
 stk <- as(brp, 'FLStock')[, 5]
 dimnames(stk) <- list(year=1)
 range(stk, c('minfbar', 'maxfbar')) <- c(c(par['a1',]), 30)
