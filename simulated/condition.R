@@ -7,7 +7,8 @@
 
 library(plyr)
 library(FLBRP)
-library(FLAssess)
+library(FLife)
+library(FLasher)
 
 source('functions.R')
 
@@ -15,6 +16,7 @@ source('functions.R')
 set.seed(1234)
 nyears <- 60 # Max. number of years
 iters <- 250 # No. of replicates for SR residuals
+iters <- 5 # No. of replicates for SR residuals
 vBiomass <- 1000 # Initial VBiomass
 margSD <- 0.2 # Marginal SD of AR1 process
 rsd <- 0.6 # Log SD of SR residuals
@@ -69,8 +71,10 @@ val <- data.frame(
 for(lh in names(sce$LH)) {
 sims <- list()
 input <- list()
-	par <- gislasim(sce$LH[[lh]]$par)
-	brp <- lh(par, range=sce$LH[[lh]]$range)
+	par <- lhPar(sce$LH[[lh]]$par)
+	brp <- lhEql(par, range=sce$LH[[lh]]$range)
+  # DEBUG
+  refpts(brp)['crash', 'harvest'] <- refpts(brp)['msy', 'harvest'] * 2.5
 
 # AR
 for(ar in names(sce$AR)) {
@@ -79,7 +83,8 @@ for(ar in names(sce$AR)) {
 	"AR"=ar1rlnorm(rho=rho, iters=iters, years=2:nyears, margSD=margSD))
 # ID
 for(id in names(sce$ID)) {
-	stk <- setupStock(brp, iniBiomass=vBiomass * sce$ID[[id]], nyears)
+	stk <- propagate(setupStock(brp, iniBiomass=vBiomass * sce$ID[[id]], nyears),
+    iters)
 
 # ED
 for(ed in names(sce$ED)) {
@@ -138,14 +143,15 @@ print(name)
 # Add catchE
 sims <- lapply(sims, function(x) {
 	# Normal error with CV=20%
-	x$catchE <- FLQuant(aperm(apply(x$catch, 1:5, function(x) rnorm(iters, x, x* 0.20)),
-		c(2,3,4,5,6,1)), dimnames=dimnames(x$catch))
+	x$catchE <- apply(x$catch, 1:5, function(x) rnorm(iters, x, x * 0.20))
+#    FLQuant(aperm(apply(x$catch, 1:5, function(x) rnorm(iters, x, x* 0.20)),
+#		c(2,3,4,5,6,1)), dimnames=dimnames(x$catch))
 	return(x)
 	})
 
 # save RData
 save(sims, file=paste("out/", rsd, "/lh/sims", lh, format(Sys.time(), "%Y%m%d%H%M"),
-	".RData", sep=""))
+	".RData", sep=""), compress="xz")
 
 # input
 input <- lapply(sims, function(x) {
@@ -194,11 +200,11 @@ for (i in 1:iters) {
 
 # save RData
 save(input, file=paste("out/", rsd, "/lh/input", lh, format(Sys.time(), "%Y%m%d%H%M"),
-	".RData", sep=""))
+	".RData", sep=""), compress="xz")
 save(inputE, file=paste("out/", rsd, "/lh/inputE", lh, format(Sys.time(), "%Y%m%d%H%M"),
-	".RData", sep=""))
+	".RData", sep=""), compress="xz")
 save(inputE0, file=paste("out/", rsd, "/inputE0CV", format(Sys.time(), "%Y%m%d%H%M"),
-	".RData", sep=""))
+	".RData", sep=""), compress="xz")
 
 rm(inputTMP)
 gc()
@@ -207,20 +213,21 @@ gc()
 
 # DETERMINISTIC RUN for sims and input {{{
 
-sce$AR <- sce$AR['NE']
+sce$AR <- sce$AR['NR']
 
 sims <- list()
 input <- list()
 
 # LH
 for(lh in names(sce$LH)) {
-	par <- gislasim(sce$LH[[lh]]$par)
-	brp <- lh(par, range=sce$LH[[lh]]$range)
+	par <- lhPar(sce$LH[[lh]]$par)
+	brp <- lhEql(par, range=sce$LH[[lh]]$range)
+  refpts(brp)['crash', 'harvest'] <- refpts(brp)['msy', 'harvest'] * 2.5
 
 # AR
 for(ar in names(sce$AR)) {
 	srres <- switch(ar,
-	"NE"=rlnorm(1, FLQuant(0, dimnames=list(year=2:nyears)), sd=0))
+	"NR"=rlnorm(1, FLQuant(0, dimnames=list(year=2:nyears)), sd=0))
 
 # ID
 for(id in names(sce$ID)) {
@@ -305,20 +312,21 @@ save(input, file=paste("out/", rsd, "/inputDET1.2", format(Sys.time(), "%Y%m%d%H
 
 # DETERMINISTIC RUN for sims and input with ED target=1.2 BMSY{{{
 
-sce$AR <- sce$AR['NE']
+sce$AR <- sce$AR['NR']
 
 sims <- list()
 input <- list()
 
 # LH
 for(lh in names(sce$LH)) {
-	par <- gislasim(sce$LH[[lh]]$par)
-	brp <- lh(par, range=sce$LH[[lh]]$range)
+	par <- lhPar(sce$LH[[lh]]$par)
+	brp <- lhEql(par, range=sce$LH[[lh]]$range)
+  refpts(brp)['crash', 'harvest'] <- refpts(brp)['msy', 'harvest'] * 2.5
 
 # AR
 for(ar in names(sce$AR)) {
 	srres <- switch(ar,
-	"NE"=rlnorm(1, FLQuant(0, dimnames=list(year=2:nyears)), sd=0))
+	"NR"=rlnorm(1, FLQuant(0, dimnames=list(year=2:nyears)), sd=0))
 
 # ID
 for(id in names(sce$ID)) {

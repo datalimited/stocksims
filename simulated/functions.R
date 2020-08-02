@@ -42,13 +42,13 @@ effortDynamics <- function(stk, bmsy, sr, years=2:dims(stk)$maxyear, xp,
 		eff <- har * (bio / bmsy) ^ xp
 	
 		# fwdControl
-		fctl <- fwdControl(data.frame(year=year, quantity='f', val=c(eff)[1]))
+		fctl <- fwdControl(data.frame(year=year, quant='f', value=c(eff)[1]))
 		#fctl@trgtArray <- array(NA, dim=c(1,3,iters),
 		#	dimnames=list(year, c('min','val','max'), iter=1:iters))
 		#fctl@trgtArray[,2,] <- c(eff)
 
 		# fwd
-		stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres[,ac(year)], sr.residuals.mult=TRUE)
+		stk <- fwd(stk, control=fctl, sr=sr, deviances=srres[,ac(year)])
     cat ("\r", round(100*year/nyears, digits=0), "% ", sep="")
 	}
 	cat("\n")
@@ -60,7 +60,7 @@ oneWayTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	years=2:dims(stk)$maxyear, srres=rnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)) {
 
 	# limits
-	f0 <- c(fbar(stk)[,1])
+	f0 <- c(fbar(stk)[,1,,,,1])
 	fmax <- c(fmax)
 	rate <- exp((log(fmax) - log(f0)) / (length(years)))
 
@@ -68,10 +68,10 @@ oneWayTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	f <- rate^(0:59)*f0
 	
 	# fwdControl
-	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f[-1]))
+	fctl <- fwdControl(data.frame(year=years, quant='f', value=f[-1]))
 
 	# fwd
-	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres, sr.residuals.mult=TRUE)
+	stk <- fwd(stk, control=fctl, sr=sr, deviances=srres)
 	
 	return(stk)
 } # }}}
@@ -104,10 +104,10 @@ rollerCoaster <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	f[(lfup+6):length(f)] <- fdo[1:lfdo]
 	
 	# fwdControl
-	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f))
+	fctl <- fwdControl(data.frame(year=years, quant='f', value=f))
 
 	# fwd
-	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres, sr.residuals.mult=TRUE)
+	stk <- fwd(stk, control=fctl, sr=sr, deviances)
 	
 	return(stk)
 } # }}}
@@ -122,7 +122,7 @@ rollerCoaster2 <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	f <- rep(NA, length(years))
 
 	# limits
-	f0 <- c(fbar(stk)[,1])
+	f0 <- c(fbar(stk)[,1,,,,1])
 	fmax <- c(fmax)
 
 	# linear trend up: 1:upy
@@ -137,10 +137,10 @@ rollerCoaster2 <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	f[(upy+top):(upy+top+downy-1)] <- fdo
 	
 	# fwdControl
-	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f))
+	fctl <- fwdControl(data.frame(year=years, quant='f', value=f))
 
 	# fwd
-	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres, sr.residuals.mult=TRUE)
+	stk <- fwd(stk, control=fctl, sr=sr, deviances=srres)
 	
 	return(stk)
 } # }}}
@@ -151,7 +151,7 @@ oneWayQuickTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	srres=rnorm(iters, FLQuant(0, dimnames=list(year=years)), 0)) {
 
 	# limits
-	f0 <- c(fbar(stk)[,1])
+	f0 <- c(fbar(stk)[,1,,,,1])
 	fmax <- c(fmax)
 
 	# linear trend
@@ -160,10 +160,10 @@ oneWayQuickTrip <- function(stk, sr, fmax=refpts(brp)['crash', 'harvest']*0.80,
 	
 
 	# fwdControl
-	fctl <- fwdControl(data.frame(year=years, quantity='f', val=f[-1]))
+	fctl <- fwdControl(data.frame(year=years, quant='f', value=f[-1]))
 
 	# fwd
-	stk <- fwd(stk, fctl, sr=sr, sr.residuals=srres, sr.residuals.mult=TRUE)
+	stk <- fwd(stk, control=fctl, sr=sr, deviances=srres)
 	
 	return(stk)
 } # }}}
