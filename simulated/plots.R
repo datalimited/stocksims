@@ -11,9 +11,10 @@ library(ggplot2)
 library(gridExtra)
 library(FLCore)
 
-load('out/0.6/simsDET201306071347.RData')
+# load('out/0.6/simsDET201306071347.RData')
 
-# sims 
+# sims
+
 val <- lapply(sims, function(x) cbind(x$val, as.data.frame(x$catch)))
 val <- lapply(sims, function(x) cbind(x$val, as.data.frame(rec(x$stock))))
 val <- lapply(sims, function(x) cbind(x$val, as.data.frame(ssb(x$stock))))
@@ -28,9 +29,6 @@ dev.off()
 
 # inputE
 val <- lapply(inputE02, function(x) cbind(x$val, as.data.frame(x$catch)))
-
-
-
 
 
 # SELECT one run per LH, first year

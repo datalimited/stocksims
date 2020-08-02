@@ -16,7 +16,7 @@ source('functions.R')
 set.seed(1234)
 nyears <- 60 # Max. number of years
 iters <- 250 # No. of replicates for SR residuals
-iters <- 5 # No. of replicates for SR residuals
+iter <- 5
 vBiomass <- 1000 # Initial VBiomass
 margSD <- 0.2 # Marginal SD of AR1 process
 rsd <- 0.6 # Log SD of SR residuals
