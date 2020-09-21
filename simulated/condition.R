@@ -72,9 +72,9 @@ for(lh in names(sce$LH)) {
 sims <- list()
 input <- list()
 	par <- lhPar(sce$LH[[lh]]$par)
-	brp <- lhEql(par, range=sce$LH[[lh]]$range)
+	brp <- lhEql(par, range=sce$LH[[lh]]$range, spwn=0.01)
 
-# AR
+  # AR
 for(ar in names(sce$AR)) {
 	srres <- switch(ar,
 	"NR"=rlnorm(iters, FLQuant(0, dimnames=list(year=2:nyears)), sd=rsd),
