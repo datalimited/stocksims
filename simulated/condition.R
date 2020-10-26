@@ -26,6 +26,16 @@ rho <- 0.6 # AR rho
 sims <- list()
 input <- list()
 
+# OUTPUT dirs
+
+dir.create("out/0.2/lh/input", recursive=TRUE)
+dir.create("out/0.2/lh/inputE")
+dir.create("out/0.2/lh/inputCV")
+
+dir.create("out/0.6/lh/input", recursive=TRUE)
+dir.create("out/0.6/lh/inputE")
+dir.create("out/0.6/lh/inputCV")
+
 # sce: Scenarios list {{{
 sce <- list(
 	# LH
